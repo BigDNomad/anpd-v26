@@ -263,23 +263,6 @@ def _group_appearances_by_name(appearances: list[CharacterAppearance]) -> dict[s
     return groups
 
 
-def _build_roster_parts_index(roster: set[str]) -> dict[str, str]:
-    """Build a reverse index: individual word → full roster entry.
-
-    This allows matching a single-word extracted name ("Silas") against
-    multi-word roster entries ("silas vance") even when the individual
-    part was not added to the roster set separately.
-    """
-    index: dict[str, str] = {}
-    for entry in roster:
-        parts = entry.split()
-        if len(parts) >= 2:
-            for part in parts:
-                if len(part) > 2:
-                    index.setdefault(part, entry)
-    return index
-
-
 def check_names_against_roster(
     appearances: list[CharacterAppearance],
     roster: set[str],
@@ -289,25 +272,15 @@ def check_names_against_roster(
     findings: list[Finding] = []
     grouped = _group_appearances_by_name(appearances)
 
-    # Reverse index: single word → full roster name.  Ensures first-name-only
-    # ("Silas") and surname-only ("Kowalski") references to rostered full names
-    # ("silas vance", "meat kowalski") are recognised before flagging.
-    roster_parts = _build_roster_parts_index(roster)
-
     for norm_name, apps in sorted(grouped.items()):
         if not norm_name or len(norm_name) < 2:
             continue
 
-        # Check if name (or any part) matches roster — forward match
+        # Check if name (or any part) matches roster
         display_name = apps[0].name
         name_parts = set(norm_name.split())
         in_roster = (norm_name in roster or
                      any(part in roster for part in name_parts))
-
-        # Reverse match: extracted single-word name is a component of a
-        # multi-word roster entry (e.g. "kowalski" → "meat kowalski").
-        if not in_roster and len(name_parts) == 1:
-            in_roster = norm_name in roster_parts
 
         # Check if name matches banned list
         in_banned = (norm_name in banned or

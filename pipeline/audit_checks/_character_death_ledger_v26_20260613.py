@@ -52,22 +52,6 @@ TIER2_DEATH = [
     r"{NAME}\s+was killed",
 ]
 
-# Hypothetical/contemplation markers: death language inside these contexts
-# does NOT constitute an actual death event (e.g. "if Coyle died", "what it
-# would mean if he was taken", "imagined Archer dead").
-# Check: a window around the death-pattern match is scanned for these; if
-# any matches, the death hit is suppressed.
-HYPOTHETICAL_MARKERS = [
-    r"\bif\s+{NAME}\s+(?:died|was dead|was killed|were dead|were killed)\b",
-    r"\bwhat (?:it )?would (?:mean|happen|look like)\b.{0,60}{NAME}",
-    r"\bimagin\w+\s+{NAME}\s+(?:dead|dying|killed)\b",
-    r"\bthought about\b.{0,40}{NAME}\s+(?:died|dying|dead|killed)\b",
-    r"\bwondered\b.{0,40}{NAME}\s+(?:died|dying|dead|killed)\b",
-    r"\bfeared\b.{0,40}{NAME}\s+(?:died|dying|dead|killed)\b",
-    r"\bworried\b.{0,40}{NAME}\s+(?:died|dying|dead|killed)\b",
-    r"\bif\b.{0,30}{NAME}\s+(?:died|was dead|was killed)\b",
-]
-
 # Patterns indicating passive/possessive mentions (NOT alive-and-acting)
 PASSIVE_MARKERS = [
     r"{NAME}'s (?:body|corpse|remains)",
@@ -218,29 +202,12 @@ def _match_patterns(text: str, name: str,
     return results
 
 
-def _is_hypothetical(text: str, pos: int, name: str, radius: int = 120) -> bool:
-    """Check whether a death-pattern match at *pos* falls inside a
-    hypothetical/contemplation context (e.g. "if Coyle died",
-    "thought about what it would mean if …").  Returns True when the
-    death language is not an actual narrative assertion."""
-    window_start = max(0, pos - radius)
-    window_end = min(len(text), pos + radius)
-    window = text[window_start:window_end]
-    name_esc = re.escape(name)
-    for pat_str in HYPOTHETICAL_MARKERS:
-        pat = re.compile(pat_str.replace("{NAME}", name_esc), re.IGNORECASE)
-        if pat.search(window):
-            return True
-    return False
-
-
 def _detect_death_events(text: str, scene_number: int, name: str,
                          has_prior_death: bool) -> list[tuple[int, str, int]]:
     """Detect death events for a character in a scene.
 
     Returns list of (scene_number, snippet, tier) where tier is 1 or 2.
     Tier 2 events are filtered if has_prior_death is True.
-    Contemplation/hypothetical/feared death is suppressed (never registers).
     """
     results: list[tuple[int, str, int]] = []
 
@@ -248,9 +215,7 @@ def _detect_death_events(text: str, scene_number: int, name: str,
     tier1_hits = (_match_patterns(text, name, TIER1_DEATH_SUBJECT) +
                   _match_patterns(text, name, TIER1_DEATH_OBJECT))
     if tier1_hits:
-        pos, snippet = tier1_hits[0]
-        if _is_hypothetical(text, pos, name):
-            return results  # Suppressed — contemplation, not death
+        _, snippet = tier1_hits[0]
         results.append((scene_number, snippet, 1))
         return results  # One death per scene
 
@@ -258,9 +223,7 @@ def _detect_death_events(text: str, scene_number: int, name: str,
     if not has_prior_death:
         tier2_hits = _match_patterns(text, name, TIER2_DEATH)
         if tier2_hits:
-            pos, snippet = tier2_hits[0]
-            if _is_hypothetical(text, pos, name):
-                return results  # Suppressed — contemplation, not death
+            _, snippet = tier2_hits[0]
             results.append((scene_number, snippet, 2))
             return results
 

@@ -8,12 +8,9 @@ two files and re-narrated the connection at the seam, producing a duplicate rend
 with an object-state contradiction (laptop open / case closed vs. re-connect "I'm in").
 
 Violation classes:
-  CLASS_B duplicate-with-contradiction — two near scenes render the same beat AND a
-          concrete object's state disagrees between them. Demoted from CLASS_A per
-          operator ruling 2026-06-13: sequential scene pairs routinely show natural
-          state evolution (object picked up then stowed, fire starting then spreading)
-          which the LLM signature extractor cannot distinguish from true contradiction.
-          F-INT-9 precedent; Task 8b operator-precedented ruling.
+  CLASS_A duplicate-with-contradiction — two near scenes render the same beat AND a
+          concrete object's state disagrees between them (the dangerous case: the
+          contradiction reaches the reader as a continuity error).
   CLASS_B duplicate-clean — two near scenes render the same beat with no contradiction
           (redundant re-narration; review, may be intentional).
 
@@ -128,7 +125,7 @@ def _build_findings(sigs: dict[int, dict]) -> list[Finding]:
                 obj, sa, sb = contra
                 findings.append(Finding(
                     check_id="MA-011-duplicate-render-detection",
-                    severity="CLASS_B",
+                    severity="CLASS_A",
                     scene_number=None,
                     scene_numbers=[n, m],
                     description=(f"Scenes {n} and {m} re-render the same beat "
@@ -193,9 +190,9 @@ def _extract(manuscript: ManuscriptArtifact) -> dict[int, dict]:
 
 class DuplicateRenderDetection:
     check_id = "MA-011-duplicate-render-detection"
-    severity = "CLASS_B"
+    severity = "CLASS_A"
     description = ("Duplicate render: adjacent/near scenes re-rendering the same beat; "
-                   "advisory (CLASS_B) — demoted 2026-06-13 per operator ruling.")
+                   "Class A when an object-state contradiction is present.")
 
     def run(self, manuscript: ManuscriptArtifact, briefs: BriefBundle) -> list[Finding]:
         sigs = _extract(manuscript)
