@@ -8,8 +8,4 @@ except (ImportError, ModuleNotFoundError):
 _sys.modules[__name__] = _canonical
 
 if __name__ == "__main__":
-    if hasattr(_canonical, "main"):
-        _canonical.main()
-    else:
-        print(f"ERROR: {_canonical.__name__} has no main() — cannot run as subprocess", file=_sys.stderr)
-        _sys.exit(1)
+    _sys.exit(_canonical.main() if hasattr(_canonical, "main") else 2)
