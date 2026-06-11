@@ -1148,15 +1148,18 @@ def _attempt_state_extraction(
     --output, --prior-state, or --series-dir (state_tracker's argparse rejects
     unknown args and exits non-zero).
     """
-    state_script = mc.COMPONENTS["state_tracker"]
-    if not os.path.isfile(state_script):
+    state_module = mc.COMPONENTS["state_tracker"]
+    try:
+        import importlib as _il
+        _il.import_module(state_module)
+    except (ImportError, ModuleNotFoundError):
         pipeline_state["class_a_failures"] += 1
         mc.write_stop_report(
             book_dir=args.book_dir,
             component="state_tracker",
             phase=5,
             error_type="Class A",
-            error_message=f"state_tracker.py not found at {state_script}",
+            error_message=f"state_tracker not importable as {state_module}",
             suggested_fix="ship state_tracker.py to /anpd/v26/pipeline/",
             pipeline_state_description=f"halted at scene {scene_num} state extraction",
         )
