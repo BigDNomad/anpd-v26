@@ -1,0 +1,91 @@
+{
+  "attempts_total": 3,
+  "max_attempts_allowed": 3,
+  "final_class_a_count": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "class_a_count": 1,
+      "class_b_count": 0,
+      "class_c_count": 0,
+      "findings": [
+        {
+          "finding_id": "character_profile_envelope_key_0001",
+          "auditor": "character_profile_auditor",
+          "gate": "character_profile",
+          "pass_name": "envelope_key_check",
+          "class": "A",
+          "tier": "1",
+          "category": "schema_violation",
+          "description": "Forbidden envelope key 'characters' found at top level of series-level character profiles file. Per Schema v1.1.0 \u00a73.4, character_profiles.json contains only per-character entries; envelope fields belong in their canonical homes (intake, book_config, series_config, or series_bible).",
+          "location": {
+            "type": "field_path",
+            "file_path": "series/airmen/character_profiles.json",
+            "field_path": "characters"
+          },
+          "fix_action": "auto_fix",
+          "suggested_fix": "Remove the top-level 'characters' field from series/airmen/character_profiles.json. If the field's content is needed elsewhere, move it to its canonical home per Schema \u00a73.4.",
+          "timestamp": "2026-06-11 08:04",
+          "evidence": null,
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "attempt": 2,
+      "class_a_count": 1,
+      "class_b_count": 0,
+      "class_c_count": 0,
+      "findings": [
+        {
+          "finding_id": "character_profile_envelope_key_0001",
+          "auditor": "character_profile_auditor",
+          "gate": "character_profile",
+          "pass_name": "envelope_key_check",
+          "class": "A",
+          "tier": "1",
+          "category": "schema_violation",
+          "description": "Forbidden envelope key 'characters' found at top level of series-level character profiles file. Per Schema v1.1.0 \u00a73.4, character_profiles.json contains only per-character entries; envelope fields belong in their canonical homes (intake, book_config, series_config, or series_bible).",
+          "location": {
+            "type": "field_path",
+            "file_path": "series/airmen/character_profiles.json",
+            "field_path": "characters"
+          },
+          "fix_action": "auto_fix",
+          "suggested_fix": "Remove the top-level 'characters' field from series/airmen/character_profiles.json. If the field's content is needed elsewhere, move it to its canonical home per Schema \u00a73.4.",
+          "timestamp": "2026-06-11 08:06",
+          "evidence": null,
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "attempt": 3,
+      "class_a_count": 1,
+      "class_b_count": 0,
+      "class_c_count": 0,
+      "findings": [
+        {
+          "finding_id": "character_profile_envelope_key_0001",
+          "auditor": "character_profile_auditor",
+          "gate": "character_profile",
+          "pass_name": "envelope_key_check",
+          "class": "A",
+          "tier": "1",
+          "category": "schema_violation",
+          "description": "Forbidden envelope key 'characters' found at top level of series-level character profiles file. Per Schema v1.1.0 \u00a73.4, character_profiles.json contains only per-character entries; envelope fields belong in their canonical homes (intake, book_config, series_config, or series_bible).",
+          "location": {
+            "type": "field_path",
+            "file_path": "series/airmen/character_profiles.json",
+            "field_path": "characters"
+          },
+          "fix_action": "auto_fix",
+          "suggested_fix": "Remove the top-level 'characters' field from series/airmen/character_profiles.json. If the field's content is needed elsewhere, move it to its canonical home per Schema \u00a73.4.",
+          "timestamp": "2026-06-11 08:08",
+          "evidence": null,
+          "confidence": "HIGH"
+        }
+      ]
+    }
+  ]
+}
