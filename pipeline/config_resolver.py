@@ -6,3 +6,10 @@ try:
 except (ImportError, ModuleNotFoundError):
     _canonical = _il.import_module("config_resolver_v26_20260611")
 _sys.modules[__name__] = _canonical
+
+if __name__ == "__main__":
+    if hasattr(_canonical, "main"):
+        _canonical.main()
+    else:
+        print(f"ERROR: {_canonical.__name__} has no main() — cannot run as subprocess", file=_sys.stderr)
+        _sys.exit(1)

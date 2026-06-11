@@ -1,12 +1,15 @@
 """
-Tests for Q19 denouement scene counting logic.
+Tests for Q19 denouement scene counting + multi-pass majority logic.
 
 Amended bands (2026-06-12):
-1. 0 DENOUEMENT → FAIL (deficit)
-2. 1 DENOUEMENT → FAIL (deficit)
-3. 2 DENOUEMENT → PASS (ideal)
-4. 3 DENOUEMENT → WEAK (advisory)
-5. 4 DENOUEMENT → FAIL (excess)
+  0–1 DENOUEMENT → FAIL (deficit)
+  2   DENOUEMENT → PASS (ideal)
+  3   DENOUEMENT → WEAK (advisory)
+  4+  DENOUEMENT → FAIL (excess)
+
+Multi-pass (2026-06-12 T1400):
+  3 passes, per-Q majority verdict, per-scene majority classification.
+  Missing structured data → ValueError (never fallback to note text).
 """
 
 from __future__ import annotations
@@ -18,11 +21,15 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from synopsis_auditor import _count_denouement_scenes, consolidate
+from synopsis_auditor import (
+    _count_denouement_scenes,
+    _majority_verdict,
+    _majority_q19_scenes,
+    consolidate,
+)
 
 
 def _make_q19_item(scenes):
-    """Build a Q19 item with post_climax_scenes data."""
     return {
         "id": "Q19",
         "verdict": "FAIL",
@@ -35,55 +42,114 @@ def _make_scene(num, classification, justification="test"):
     return {"scene": num, "classification": classification, "justification": justification}
 
 
+# ── _count_denouement_scenes ──────────────────────────────────────────────────
+
 class TestCountDenouementScenes:
 
     def test_zero_denouement(self):
-        item = _make_q19_item([
-            _make_scene(97, "AFTERMATH"),
-            _make_scene(98, "AFTERMATH"),
-        ])
+        item = _make_q19_item([_make_scene(97, "AFTERMATH"), _make_scene(98, "AFTERMATH")])
         count, table = _count_denouement_scenes(item)
         assert count == 0
         assert "0 DENOUEMENT" in table
 
     def test_one_denouement(self):
-        item = _make_q19_item([
-            _make_scene(97, "AFTERMATH"),
-            _make_scene(98, "AFTERMATH"),
-            _make_scene(99, "DENOUEMENT"),
-        ])
-        count, table = _count_denouement_scenes(item)
+        item = _make_q19_item([_make_scene(97, "AFTERMATH"), _make_scene(99, "DENOUEMENT")])
+        count, _ = _count_denouement_scenes(item)
         assert count == 1
 
     def test_two_denouement(self):
         item = _make_q19_item([
-            _make_scene(97, "AFTERMATH"),
-            _make_scene(98, "AFTERMATH"),
-            _make_scene(99, "DENOUEMENT"),
-            _make_scene(100, "DENOUEMENT"),
+            _make_scene(97, "AFTERMATH"), _make_scene(98, "AFTERMATH"),
+            _make_scene(99, "DENOUEMENT"), _make_scene(100, "DENOUEMENT"),
         ])
-        count, table = _count_denouement_scenes(item)
+        count, _ = _count_denouement_scenes(item)
         assert count == 2
 
     def test_three_denouement(self):
         item = _make_q19_item([
-            _make_scene(98, "DENOUEMENT"),
-            _make_scene(99, "DENOUEMENT"),
+            _make_scene(98, "DENOUEMENT"), _make_scene(99, "DENOUEMENT"),
             _make_scene(100, "DENOUEMENT"),
         ])
-        count, table = _count_denouement_scenes(item)
+        count, _ = _count_denouement_scenes(item)
         assert count == 3
 
     def test_four_denouement(self):
         item = _make_q19_item([
-            _make_scene(97, "DENOUEMENT"),
-            _make_scene(98, "DENOUEMENT"),
-            _make_scene(99, "DENOUEMENT"),
-            _make_scene(100, "DENOUEMENT"),
+            _make_scene(97, "DENOUEMENT"), _make_scene(98, "DENOUEMENT"),
+            _make_scene(99, "DENOUEMENT"), _make_scene(100, "DENOUEMENT"),
         ])
-        count, table = _count_denouement_scenes(item)
+        count, _ = _count_denouement_scenes(item)
         assert count == 4
 
+    def test_missing_structured_data_raises(self):
+        """No post_climax_scenes → ValueError, never fallback to note text."""
+        item = {"id": "Q19", "verdict": "FAIL", "note": "DENOUEMENT DENOUEMENT DENOUEMENT"}
+        with pytest.raises(ValueError, match="missing structured post_climax_scenes"):
+            _count_denouement_scenes(item)
+
+    def test_empty_list_raises(self):
+        item = _make_q19_item([])
+        with pytest.raises(ValueError, match="missing structured post_climax_scenes"):
+            _count_denouement_scenes(item)
+
+
+# ── _majority_verdict ─────────────────────────────────────────────────────────
+
+class TestMajorityVerdict:
+
+    def test_three_agree(self):
+        v, stable = _majority_verdict(["PASS", "PASS", "PASS"])
+        assert v == "PASS"
+        assert stable is True
+
+    def test_two_of_three(self):
+        v, stable = _majority_verdict(["PASS", "FAIL", "PASS"])
+        assert v == "PASS"
+        assert stable is True
+
+    def test_two_of_three_fail(self):
+        v, stable = _majority_verdict(["FAIL", "PASS", "FAIL"])
+        assert v == "FAIL"
+        assert stable is True
+
+    def test_three_way_split_takes_worst(self):
+        v, stable = _majority_verdict(["PASS", "WEAK", "FAIL"])
+        assert v == "FAIL"
+        assert stable is False
+
+    def test_two_of_three_weak(self):
+        v, stable = _majority_verdict(["WEAK", "PASS", "WEAK"])
+        assert v == "WEAK"
+        assert stable is True
+
+
+# ── _majority_q19_scenes ──────────────────────────────────────────────────────
+
+class TestMajorityQ19Scenes:
+
+    def test_all_agree(self):
+        items = [
+            _make_q19_item([_make_scene(97, "AFTERMATH"), _make_scene(98, "DENOUEMENT")]),
+            _make_q19_item([_make_scene(97, "AFTERMATH"), _make_scene(98, "DENOUEMENT")]),
+            _make_q19_item([_make_scene(97, "AFTERMATH"), _make_scene(98, "DENOUEMENT")]),
+        ]
+        merged = _majority_q19_scenes(items)
+        assert len(merged) == 2
+        assert merged[0]["classification"] == "AFTERMATH"
+        assert merged[1]["classification"] == "DENOUEMENT"
+
+    def test_split_takes_majority(self):
+        items = [
+            _make_q19_item([_make_scene(98, "AFTERMATH")]),
+            _make_q19_item([_make_scene(98, "DENOUEMENT")]),
+            _make_q19_item([_make_scene(98, "AFTERMATH")]),
+        ]
+        merged = _majority_q19_scenes(items)
+        assert merged[0]["classification"] == "AFTERMATH"
+        assert "votes:" in merged[0]["justification"]
+
+
+# ── consolidate verdict bands ─────────────────────────────────────────────────
 
 def _effective_config():
     return {
@@ -94,7 +160,6 @@ def _effective_config():
 
 
 def _make_calls_with_q19(scenes):
-    """Build call_1/call_2 data with a Q19 item in call_1."""
     q19 = _make_q19_item(scenes)
     call_1 = {
         "items": [q19],
@@ -109,10 +174,8 @@ class TestQ19ConsolidateVerdict:
 
     def test_two_denouement_passes_gate(self):
         call_1, call_2 = _make_calls_with_q19([
-            _make_scene(97, "AFTERMATH"),
-            _make_scene(98, "AFTERMATH"),
-            _make_scene(99, "DENOUEMENT"),
-            _make_scene(100, "DENOUEMENT"),
+            _make_scene(97, "AFTERMATH"), _make_scene(98, "AFTERMATH"),
+            _make_scene(99, "DENOUEMENT"), _make_scene(100, "DENOUEMENT"),
         ])
         output_json, _, verdict = consolidate(call_1, call_2, "Test", 20000, _effective_config())
         q19 = [i for i in output_json["items"] if i["id"] == "Q19"][0]
@@ -120,10 +183,8 @@ class TestQ19ConsolidateVerdict:
         assert "Q19" not in output_json["fails"]
 
     def test_three_denouement_weak_advisory(self):
-        """3 DENOUEMENT → WEAK (advisory, not a gate-blocker)."""
         call_1, call_2 = _make_calls_with_q19([
-            _make_scene(98, "DENOUEMENT"),
-            _make_scene(99, "DENOUEMENT"),
+            _make_scene(98, "DENOUEMENT"), _make_scene(99, "DENOUEMENT"),
             _make_scene(100, "DENOUEMENT"),
         ])
         output_json, _, verdict = consolidate(call_1, call_2, "Test", 20000, _effective_config())
@@ -132,12 +193,9 @@ class TestQ19ConsolidateVerdict:
         assert "Q19" not in output_json["fails"]
 
     def test_four_denouement_fails_gate(self):
-        """4+ DENOUEMENT → FAIL (excess)."""
         call_1, call_2 = _make_calls_with_q19([
-            _make_scene(97, "DENOUEMENT"),
-            _make_scene(98, "DENOUEMENT"),
-            _make_scene(99, "DENOUEMENT"),
-            _make_scene(100, "DENOUEMENT"),
+            _make_scene(97, "DENOUEMENT"), _make_scene(98, "DENOUEMENT"),
+            _make_scene(99, "DENOUEMENT"), _make_scene(100, "DENOUEMENT"),
         ])
         output_json, _, verdict = consolidate(call_1, call_2, "Test", 20000, _effective_config())
         q19 = [i for i in output_json["items"] if i["id"] == "Q19"][0]
@@ -146,8 +204,7 @@ class TestQ19ConsolidateVerdict:
 
     def test_zero_denouement_fails_gate(self):
         call_1, call_2 = _make_calls_with_q19([
-            _make_scene(97, "AFTERMATH"),
-            _make_scene(98, "AFTERMATH"),
+            _make_scene(97, "AFTERMATH"), _make_scene(98, "AFTERMATH"),
         ])
         output_json, _, verdict = consolidate(call_1, call_2, "Test", 20000, _effective_config())
         q19 = [i for i in output_json["items"] if i["id"] == "Q19"][0]
@@ -155,13 +212,21 @@ class TestQ19ConsolidateVerdict:
         assert "deficit" in q19["note"]
 
     def test_one_denouement_fails_gate(self):
-        """1 DENOUEMENT → FAIL (deficit)."""
         call_1, call_2 = _make_calls_with_q19([
-            _make_scene(97, "AFTERMATH"),
-            _make_scene(98, "AFTERMATH"),
-            _make_scene(99, "DENOUEMENT"),
+            _make_scene(97, "AFTERMATH"), _make_scene(99, "DENOUEMENT"),
         ])
         output_json, _, verdict = consolidate(call_1, call_2, "Test", 20000, _effective_config())
         q19 = [i for i in output_json["items"] if i["id"] == "Q19"][0]
         assert q19["verdict"] == "FAIL"
         assert "deficit" in q19["note"]
+
+    def test_missing_structured_data_raises_in_consolidate(self):
+        """consolidate must raise ValueError when Q19 has no structured data."""
+        call_1 = {
+            "items": [{"id": "Q19", "verdict": "FAIL", "note": "DENOUEMENT x3"}],
+            "total_scenes": 100, "action_scenes": 67,
+            "action_scene_percentage": 67.0, "resolution_scenes": 3,
+        }
+        call_2 = {"items": [{"id": "Q8", "verdict": "PASS", "note": "ok"}]}
+        with pytest.raises(ValueError):
+            consolidate(call_1, call_2, "Test", 20000, _effective_config())
