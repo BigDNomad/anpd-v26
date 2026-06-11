@@ -11,9 +11,9 @@
 | pipeline/character_generator.py | pipeline/character_generator_v26_20260611.py | pending |
 | pipeline/character_profile_auditor.py | pipeline/character_profile_auditor_v26_20260611.py | pending |
 | pipeline/character_profile_merge.py | pipeline/character_profile_merge_v26_20260611.py | pending |
-| pipeline/config_resolver.py | pipeline/config_resolver_v26_20260611.py | pending |
-| pipeline/entity_ledger_builder.py | pipeline/entity_ledger_builder_v26_20260611.py | pending |
-| pipeline/findings.py | pipeline/findings_v26_20260611.py | pending |
+| pipeline/config_resolver.py | pipeline/config_resolver_v26_20260611.py | transferred 20260611 |
+| pipeline/entity_ledger_builder.py | pipeline/entity_ledger_builder_v26_20260611.py | transferred 20260611 |
+| pipeline/findings.py | pipeline/findings_v26_20260611.py | transferred 20260611 |
 | pipeline/fixer_preflight.py | pipeline/fixer_preflight_v26_20260611.py | pending |
 | pipeline/fixer_runner.py | pipeline/fixer_runner_v26_20260611.py | pending |
 | pipeline/formatter.py | pipeline/formatter_v26_20260611.py | pending |
@@ -21,7 +21,7 @@
 | pipeline/formatter_20260525_T0152.py | — | DO-NOT-TRANSFER (superseded version) |
 | pipeline/intake_validator.py | pipeline/intake_validator_v26_20260611.py | pending |
 | pipeline/library_loader.py | pipeline/library_loader_v26_20260611.py | pending |
-| pipeline/llm_client.py | pipeline/llm_client_v26_20260611.py | pending |
+| pipeline/llm_client.py | pipeline/llm_client_v26_20260611.py | transferred 20260611 |
 | pipeline/manifest_auditor.py | pipeline/manifest_auditor_v26_20260611.py | pending |
 | pipeline/manuscript_assembler.py | pipeline/manuscript_assembler_v26_20260611.py | pending |
 | pipeline/manuscript_auditor.py | pipeline/manuscript_auditor_v26_20260611.py | pending |
@@ -41,7 +41,7 @@
 | pipeline/scene_auditor.py | pipeline/scene_auditor_v26_20260611.py | pending |
 | pipeline/scene_formatter.py | pipeline/scene_formatter_v26_20260611.py | pending |
 | pipeline/scene_writer.py | pipeline/scene_writer_v26_20260611.py | pending |
-| pipeline/state_tracker.py | pipeline/state_tracker_v26_20260611.py | pending |
+| pipeline/state_tracker.py | pipeline/state_tracker_v26_20260611.py | transferred 20260611 |
 | pipeline/synopsis_auditor.py | pipeline/synopsis_auditor_v26_20260611.py | pending |
 | pipeline/synopsis_generator.py | pipeline/synopsis_generator_v26_20260611.py | pending |
 | pipeline/synopsis_parser.py | pipeline/synopsis_parser_v26_20260611.py | pending |
