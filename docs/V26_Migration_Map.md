@@ -23,12 +23,12 @@
 | pipeline/library_loader.py | pipeline/library_loader_v26_20260611.py | transferred 20260611 |
 | pipeline/llm_client.py | pipeline/llm_client_v26_20260611.py | transferred 20260611 |
 | pipeline/manifest_auditor.py | pipeline/manifest_auditor_v26_20260611.py | pending |
-| pipeline/manuscript_assembler.py | pipeline/manuscript_assembler_v26_20260611.py | pending |
+| pipeline/manuscript_assembler.py | pipeline/manuscript_assembler_v26_20260611.py | transferred 20260611 |
 | pipeline/manuscript_auditor.py | pipeline/manuscript_auditor_v26_20260611.py | pending |
 | pipeline/manuscript_auditor_v25.py | pipeline/manuscript_auditor_v25_v26_20260611.py | pending |
 | pipeline/manuscript_fixer.py | pipeline/manuscript_fixer_v26_20260611.py | pending |
 | pipeline/manuscript_orchestrator.py | pipeline/manuscript_orchestrator_v26_20260611.py | pending |
-| pipeline/manuscript_summarizer.py | pipeline/manuscript_summarizer_v26_20260611.py | pending |
+| pipeline/manuscript_summarizer.py | pipeline/manuscript_summarizer_v26_20260611.py | transferred 20260611 |
 | pipeline/master_controller.py | pipeline/master_controller_v26_20260611.py | pending |
 | pipeline/outline_comparator.py | pipeline/outline_comparator_v26_20260611.py | transferred 20260611 |
 | pipeline/outline_parser.py | pipeline/outline_parser_v26_20260611.py | transferred 20260611 |
@@ -40,9 +40,9 @@
 | pipeline/runtime_verifier.py | pipeline/runtime_verifier_v26_20260611.py | pending |
 | pipeline/scene_auditor.py | pipeline/scene_auditor_v26_20260611.py | pending |
 | pipeline/scene_formatter.py | pipeline/scene_formatter_v26_20260611.py | pending |
-| pipeline/scene_writer.py | pipeline/scene_writer_v26_20260611.py | pending |
+| pipeline/scene_writer.py | pipeline/scene_writer_v26_20260611.py | transferred 20260611 |
 | pipeline/state_tracker.py | pipeline/state_tracker_v26_20260611.py | transferred 20260611 |
 | pipeline/synopsis_auditor.py | pipeline/synopsis_auditor_v26_20260611.py | pending |
-| pipeline/synopsis_generator.py | pipeline/synopsis_generator_v26_20260611.py | pending |
+| pipeline/synopsis_generator.py | pipeline/synopsis_generator_v26_20260611.py | transferred 20260611 |
 | pipeline/synopsis_parser.py | pipeline/synopsis_parser_v26_20260611.py | transferred 20260611 |
-| pipeline/synopsis_summarizer.py | pipeline/synopsis_summarizer_v26_20260611.py | pending |
+| pipeline/synopsis_summarizer.py | pipeline/synopsis_summarizer_v26_20260611.py | transferred 20260611 |
