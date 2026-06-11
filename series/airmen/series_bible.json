@@ -1,0 +1,175 @@
+{
+  "series_name": "Airmen",
+  "genre": "historical_war_thriller",
+  "comparable_series": [
+    "W.E.B. Griffin",
+    "Jeff Shaara",
+    "Elmore Leonard (voice register for the new run)"
+  ],
+  "voice_register": {
+    "base_voice": "Elmore Leonard-style: lean, dialogue-forward prose. Scenes start late and end early. Spare description carrying only what the scene needs. Strong individuated character voice. No throat-clearing, no purple description, no authorial editorializing. Short to medium sentences, present-forward action. Leave out the parts readers skip. Period-accurate detail delivered through action and dialogue rather than exposition blocks.",
+    "intrusion_voice": "Reserved and rare. At moments of genuine weight — a man dying, a friend lost, the cost of the work — the prose may extend slightly, but never into lyricism. Restraint is the rule even at the lowest point.",
+    "intrusion_allocation": "ACTION scenes: 0% intrusion. SUSPENSE scenes: 5% intrusion. NON-ACTION scenes: 15% intrusion at moments of weight; otherwise base voice.",
+    "forbidden_patterns": [
+      "smell-of-room openings unless plot-relevant",
+      "relative time references (a few days ago, several weeks later, etc.)",
+      "anaphora",
+      "future-tense dramatic irony",
+      "internal exposition dumps disguised as dialogue",
+      "lyrical or ornate metaphor (anti-Leonard) except a single sanctioned exception per book where explicitly directed in the outline",
+      "lush historical scene-setting paragraphs (the original Airmen saga register; the new run is leaner)"
+    ]
+  },
+  "operational_doctrine": [
+    "CSAR (Combat Search and Rescue) is the mission: recover downed airmen alive. The PJ creed governs — that others may live.",
+    "Jolly Green Two-Two operates out of Nakhon Phanom (NKP) Royal Thai Air Force Base, flying cross-border into Laos in support of the Ho Chi Minh Trail air war.",
+    "The Laos air war is officially deniable; US forces operate in a country the United States publicly says it is not fighting in.",
+    "A rescue package is Jolly Green (HH-3E rescue helicopter), Sandy (A-1 Skyraider RESCAP escort), and a Bird Dog FAC (forward air control). Sandy is the on-scene commander.",
+    "Pararescuemen (PJs) ride the hoist and the jungle penetrator down to recover survivors; they are medics first, operators second.",
+    "Radio reception over the karst and jungle is unreliable; communication breaks up, and transmitting can give away position."
+  ],
+  "universal_anti_patterns": [
+    "smell-of-room openings unless plot-relevant",
+    "relative time references",
+    "future-tense intrusions",
+    "AI-isms (it's not just X, it's Y / a testament to / in a world where)",
+    "redundant character reintroductions after the first appearance"
+  ],
+  "recurring_characters": [
+    {
+      "name": "Danny Archer",
+      "role": "Protagonist (new run); USAF Pararescueman (PJ), Jolly Green Two-Two",
+      "age": 22
+    },
+    {
+      "name": "Tom Coyle",
+      "role": "Series co-lead (established Airmen canon); CIA contract pilot, 'Crash King'",
+      "age": 45
+    },
+    {
+      "name": "Rene Granier",
+      "role": "Series co-lead (established Airmen canon); CIA sniper, 'Buck'. Not in CSAR.",
+      "age": null
+    },
+    {
+      "name": "Silas Vance",
+      "role": "Senior PJ, mentor to Archer, Jolly Green Two-Two ('Saint')",
+      "age": 38
+    },
+    {
+      "name": "Jack Dalton",
+      "role": "Helicopter pilot / aircraft commander, Jolly Green Two-Two ('Pappy')",
+      "age": 35
+    },
+    {
+      "name": "Billy Evans",
+      "role": "Co-pilot, Jolly Green Two-Two ('The Kid')",
+      "age": 24
+    },
+    {
+      "name": "Meat Kowalski",
+      "role": "Lead flight engineer / crew chief, Jolly Green Two-Two",
+      "age": 28
+    },
+    {
+      "name": "Sparky Miller",
+      "role": "Flight engineer / scanner, Jolly Green Two-Two",
+      "age": 28
+    },
+    {
+      "name": "Animal Motherway",
+      "role": "Door gunner, Jolly Green Two-Two",
+      "age": 25
+    }
+  ],
+  "world_rules": [
+    "Series spans America's involvement in Vietnam from the 1945 OSS Deer Team (Book 1, 'A War Too Far') through the 1975 fall of Saigon ('The Beast Cometh').",
+    "The new twelve-book run follows Danny Archer's CSAR team; Coyle and Granier are the established series leads who appear across the run as legacy characters.",
+    "CSAR (Book 1 of the new run) is set in 1969, during the Ho Chi Minh Trail interdiction air war over Laos.",
+    "Coyle is the 'Crash King' — never bail if you can ride it down; the aircraft is the shell, the crew is the cargo.",
+    "Coyle's closest friend, James 'Earthquake McGoon' McGovern, was killed at the Siege of Dien Bien Phu (1954, Book 3 'We Stand Alone'); the loss haunts Coyle.",
+    "All books are historically accurate fiction — fictional characters set against documented historical events, in the manner of the established Airmen series ('Based on Historical Events')."
+  ],
+  "historical_context": {
+    "period": "Series: 1945-1975. This book (CSAR): 1969.",
+    "location": "CSAR: Nakhon Phanom (NKP), Thailand and the Laotian panhandle (Khammouane province); the Ho Chi Minh Trail.",
+    "scope": "Twelve-book new run; CSAR is Book 1, a single ~90-hour rescue operation."
+  },
+  "banned_names": [
+    "Sarah",
+    "Chen",
+    "Marcus",
+    "Webb"
+  ],
+  "hard_constraints": {
+    "setting_primary": "Laotian panhandle jungle and karst (Khammouane province), 1969",
+    "setting_secondary_allowed": [
+      "Nakhon Phanom (NKP) Royal Thai Air Force Base, Thailand",
+      "Thailand airbase (recovery/refuel)",
+      "airborne over Laos (aircraft scenes)"
+    ],
+    "forbidden_settings": [
+      "South Vietnam ground combat settings (this is the Laos air war)",
+      "any post-1969 event or location",
+      "Saigon / fall-of-Saigon material (belongs to 'The Beast Cometh', 1975)",
+      "Dien Bien Phu on-page (1954; backstory only, via Coyle's memory of McGoon)"
+    ],
+    "team_roster_authoritative": [
+      "Danny Archer",
+      "Silas Vance",
+      "Jack Dalton",
+      "Billy Evans",
+      "Meat Kowalski",
+      "Sparky Miller",
+      "Animal Motherway"
+    ],
+    "team_roster_constraint": "These seven are the Jolly Green Two-Two crew. Tom Coyle is the rescued CIA pilot (not crew). Do NOT introduce additional named American operators. Support roles may appear unnamed or with first names only.",
+    "aircraft_canonical": [
+      "AC-119K gunship ('Black Widow')",
+      "HH-3E Jolly Green rescue helicopter ('Jolly Green Two-Two')",
+      "A-1 Skyraider ('Sandy', RESCAP escort / on-scene commander)",
+      "O-1 Bird Dog (FAC)"
+    ],
+    "forbidden_aircraft": [
+      "any aircraft not in service in 1969",
+      "jet rescue helicopters",
+      "AC-130 (use the period-correct AC-119K)"
+    ],
+    "weapons_canonical": [
+      "Coyle: Smith & Wesson .38 Special revolver",
+      "Archer: PJ survival weapon and Ka-Bar knife",
+      "Pathet Lao/NVA: AK-47, RPD, RPG, SA-2 SAM",
+      "captured AK-47 recovered by Archer in Act 3"
+    ],
+    "antagonists_canonical": [
+      "Major Bounchanh Vorasak (Pathet Lao local commander)",
+      "Captain Tran Van Khoa (NVA General Reconnaissance Bureau intelligence officer)"
+    ],
+    "languages_in_scene": [
+      "English",
+      "Lao (Pathet Lao)",
+      "Vietnamese (NVA)"
+    ],
+    "forbidden_languages": [
+      "any language not historically present in 1969 Laos"
+    ]
+  },
+  "recurring_entities": [
+    {
+      "name": "Bounchanh Vorasak",
+      "aliases": ["Bounchanh", "the major"],
+      "appears_in_books": [1, 2, 3],
+      "lifecycle_constraints": {
+        "alive_at_end_of_book": true
+      }
+    },
+    {
+      "name": "Tran Van Khoa",
+      "aliases": ["Tran", "Captain Tran"],
+      "appears_in_books": [1, 2],
+      "lifecycle_constraints": {
+        "alive_at_end_of_book": true
+      }
+    }
+  ]
+}
