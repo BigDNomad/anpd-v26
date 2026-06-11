@@ -88,14 +88,19 @@ Legend:
 | Component | Manifest | COMP dict | Runtime import | Run evidence | Downstream | Verdict |
 |---|---|---|---|---|---|---|
 | library_loader | N | no | Not imported by any component | No run evidence; default path `/anpd/v25/libraries` does not exist | None | **ORPHANED** |
-| pipeline_receipt_writer | N | no | Not imported by any component | No run evidence | None | **ORPHANED** |
+
+### Reclassified (corrected 20260611)
+
+| Component | Previous | Corrected | Evidence |
+|---|---|---|---|
+| pipeline_receipt_writer | ORPHANED | **WIRED** | Lazy inline import in `master_controller._finalize_receipt()`: `from pipeline_receipt_writer import write_receipt`. Called at every pipeline exit point (normal completion, hard stop, phase failure). Missed by initial audit which only checked top-level imports. **Note for future audits:** grep function-level / inline imports, not just module-level. |
 
 ### Dead references (not components — runtime data)
 
 | Reference | Location | Status |
 |---|---|---|
-| `/anpd/v25/shared/banned_ai_phrases.json` | phase_handlers.py:1135 | Directory does not exist on disk |
-| `/anpd/v25/libraries` | library_loader.py:125 (default) | Directory does not exist on disk |
+| `/anpd/v25/shared/banned_ai_phrases.json` | phase_handlers.py:1135 | Restored to /anpd/v26/shared/ from v24 source (Dispatch 2, Part 3) |
+| `/anpd/v25/libraries` | library_loader.py:125 (default) | Directory does not exist on disk (component ORPHANED) |
 
 ---
 
@@ -103,15 +108,15 @@ Legend:
 
 Priority order for wiring review (highest value / most disconnected first):
 
-1. **pipeline_receipt_writer** — ORPHANED. Written, manifested as non-pipeline, but never imported by any component. Intended to produce pipeline execution receipts. Dead code unless wired into master_controller or phase_handlers.
+1. ~~**pipeline_receipt_writer**~~ — **RECLASSIFIED as WIRED** (Dispatch 2). Lazy inline import in `master_controller._finalize_receipt()`.
 
 2. **library_loader** — ORPHANED. Written, manifested as non-pipeline, but never imported. Default path points to non-existent `/anpd/v25/libraries/`. Real library assets exist at `/anpd/v24/libraries/` (twist, action_scene, voice). Integration into synopsis_generator or scene_writer was planned but never completed.
 
-3. **runtime_verifier** — REPORT-ONLY-UNREAD. Written, manifested as non-pipeline. Designed to verify pipeline manifest I/O contracts at runtime. No evidence of invocation. Could gate pipeline startup if wired into master_controller.
+3. ~~**runtime_verifier**~~ — **RESOLVED** (Dispatch 2). Wired as startup gate in master_controller (S001 importability check). R-rules active during run. C-rules at completion.
 
-4. **manuscript_auditor (V24)** — STUB. Registered in COMPONENTS dict and manifest, but phase_handlers explicitly stubs Gate 3 with "manuscript_auditor not yet built". The V25 replacement (manuscript_auditor_v25) is wired via fixer_runner and audit_existing_manuscript but NOT registered in COMPONENTS or manifest. The COMPONENTS dict still points to the V24 file.
+4. ~~**manuscript_auditor (V24)**~~ — **RESOLVED** (Dispatch 1). COMPONENTS dict key "manuscript_auditor" repointed to manuscript_auditor_v25. Gate 3 stub deleted and replaced with real invocation.
 
-5. **formatter** — WIRED but unlisted. Not in manifest (neither pipeline nor non-pipeline). Invoked by phase_handlers.py:741 via subprocess. Has produced .docx output (evidence in black_tide). Should be added to manifest.
+5. ~~**formatter**~~ — **RESOLVED** (Dispatch 1). Added to COMPONENTS dict and manifest.
 
 6. **book_archive** — WIRED but unlisted. Not in manifest. Standalone operator tool with evidence of use (_book_archive_btd001/ in black_tide). Should be added to manifest.
 
