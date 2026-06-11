@@ -105,6 +105,8 @@ COMPONENTS: dict[str, str] = {
     "formatter":                 "pipeline.formatter",
     "book_archive":              "pipeline.book_archive",
     "anpd_export":               "pipeline.anpd_export",
+    "capsule_writer":            "pipeline.capsule_writer",
+    "chapter_editor":            "pipeline.chapter_editor",
 }
 
 # Mode flag — only new_book is handled by this controller.
