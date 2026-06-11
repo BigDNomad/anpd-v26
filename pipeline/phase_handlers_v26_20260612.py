@@ -350,10 +350,19 @@ def handle_scene_loop(
     os.makedirs(state_dir, exist_ok=True)
     os.makedirs(chapters_dir, exist_ok=True)
 
+    # Default-resolve paths when resuming via --from-phase (gates skipped).
+    if not synopsis_path:
+        synopsis_path = os.path.join(args.book_dir, "work", "synopsis.md")
+    if not character_profiles_path:
+        # Try book-level first (character_generator output), then series-level.
+        book_cp = os.path.join(args.book_dir, "work", "character_profiles.json")
+        series_cp = os.path.join(args.series_dir, "character_profiles.json")
+        character_profiles_path = book_cp if os.path.isfile(book_cp) else series_cp
+
     # Parse synopsis.md for scene structure (scene_map RETIRED per operator
     # ruling 2026-05-06; synopsis carries [TYPE:]/[PILLAR:] structural
     # metadata directly in scene headers).
-    if not synopsis_path or not os.path.isfile(synopsis_path):
+    if not os.path.isfile(synopsis_path):
         return _wrap_class_a(
             "scene_loop",
             "synopsis.md not found (required for scene phase)",
