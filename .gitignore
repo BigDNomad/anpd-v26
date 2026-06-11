@@ -1,1 +1,23 @@
 __pycache__/
+
+# Generated work artifacts (synopsis assemblies, audit reports, state files, logs)
+series/*/b*/work/synopsis*.md
+series/*/b*/work/synopsis_chapters/
+series/*/b*/work/synopsis_audit_report.*
+series/*/b*/work/synopsis_findings.json
+series/*/b*/work/synopsis_generation_state.json
+series/*/b*/work/synopsis_generator_receipt.json
+series/*/b*/work/*.log
+
+# Run output products
+series/*/b*/out/manifest_audits/
+series/*/b*/out/reports/*.json
+series/*/b*/out/reports/*.md
+series/*/b*/out/scenes/
+series/*/b*/out/state/
+
+# Repo-root run products
+out/
+
+# Summarizer failure dumps (should go to work/ not repo root)
+summarizer_failure_*.txt
