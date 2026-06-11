@@ -1483,7 +1483,7 @@ def audit_synopsis(
         series_config_path = os.path.join(series_dir, "series_config.json")
 
     cmd = [
-        sys.executable, "-m", "pipeline.synopsis_auditor",
+        sys.executable, "-m", "pipeline.synopsis_auditor_v26_20260612_T0800",
         "--synopsis", str(synopsis_path),
         "--intake", str(intake_path),
         "--series-dir", str(series_dir),
