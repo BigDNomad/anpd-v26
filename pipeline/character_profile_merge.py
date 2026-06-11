@@ -1,4 +1,5 @@
 """V26 shim — aliases this name to the canonical module."""
+import importlib as _il
 import sys as _sys
-from . import character_profile_merge_v26_20260611 as _canonical
+_canonical = _il.import_module("pipeline.character_profile_merge_v26_20260611")
 _sys.modules[__name__] = _canonical
