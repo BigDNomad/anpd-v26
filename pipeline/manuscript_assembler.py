@@ -2,9 +2,9 @@
 import importlib as _il
 import sys as _sys
 try:
-    _canonical = _il.import_module("pipeline.manuscript_assembler_v26_20260611")
+    _canonical = _il.import_module("pipeline.manuscript_assembler_v26_20260612")
 except (ImportError, ModuleNotFoundError):
-    _canonical = _il.import_module("manuscript_assembler_v26_20260611")
+    _canonical = _il.import_module("manuscript_assembler_v26_20260612")
 _sys.modules[__name__] = _canonical
 
 if __name__ == "__main__":

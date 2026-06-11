@@ -45,8 +45,18 @@ from typing import List, Optional, Tuple
 from config_resolver import resolve_config
 from findings import create_finding, serialize_findings
 
+# ── Shared canonical parser (synopsis_parsing.py) ──────────────────────────
+# The ONE scene-header regex lives in synopsis_parsing.py.  Both this
+# auditor and synopsis_parser import from it.  Two parsers for one format
+# caused the pillar-scene dropout (2026-06-12); there will never be two
+# again.
+try:
+    from pipeline.synopsis_parsing import parse_scene_headers as _parse_headers, ParsedScene
+except ImportError:
+    from synopsis_parsing import parse_scene_headers as _parse_headers, ParsedScene
 
-# ── Scene dataclass & deterministic parser ───────────────────────────────────
+
+# ── Scene dataclass (auditor-local, maps 1:1 from ParsedScene) ─────────────
 
 @dataclass(frozen=True)
 class Scene:
@@ -58,80 +68,23 @@ class Scene:
     pillar: str = ""               # V26: TWIST1/TWIST2/TWIST3/LOWEST_POINT/FINAL_BATTLE or ""
 
 
-# V25 format: ### Scene 1 — Title [TYPE: ACTION] [POV: Hank Reyes]
-# V26 extended: ### Scene 1 — Title [TYPE: ACTION] [PILLAR: TWIST1] [POV: ...]
-_SCENE_HEADER_V25_RE = re.compile(
-    r"^###\s+Scene\s+(\d+)\s*[\u2014\u2013\-]\s*(.+?)(?:\s+\[TYPE:.*?\])?(?:\s+\[PILLAR:.*?\])?(?:\s+\[POV:.*?\])?\s*$",
-    re.MULTILINE | re.IGNORECASE,
-)
-
-# V24 format (legacy fallback): ## SCENE 1: Title
-_SCENE_HEADER_V24_RE = re.compile(r'^## SCENE (\d+):\s*(.*?)$', re.MULTILINE)
-
-# Metadata extractors for V25/V26 headers
-_TYPE_RE = re.compile(r"\[TYPE:\s*([A-Z\-]+)\s*\]", re.IGNORECASE)
-_POV_RE = re.compile(r"\[POV:\s*([^\]]+)\s*\]", re.IGNORECASE)
-_PILLAR_RE = re.compile(r"\[PILLAR:\s*([A-Z_0-9]+)\s*\]", re.IGNORECASE)
-
-
 def parse_synopsis(text: str) -> List[Scene]:
-    """Parse synopsis into Scene records.
+    """Parse synopsis into Scene records via shared canonical parser.
 
-    Supports V25 format (### Scene N — Title [TYPE: X] [POV: Y]) and falls
-    back to V24 format (## SCENE N: Title) if V25 produces zero matches.
-    V24 fallback exists for legacy synopses and will be removed when V24 retires.
-
-    Duplicate scene numbers are preserved — integrity checks detect them.
-    Returns [] on empty input or no matching headers.
+    Delegates header matching to synopsis_parsing.parse_scene_headers(),
+    then maps ParsedScene → Scene (auditor-local dataclass).
     """
-    if not text or not text.strip():
-        return []
-
-    # Try V25 format first
-    headers = list(_SCENE_HEADER_V25_RE.finditer(text))
-    is_v25 = bool(headers)
-
-    # Fallback to V24 if no V25 matches
-    if not headers:
-        headers = list(_SCENE_HEADER_V24_RE.finditer(text))
-
-    if not headers:
-        return []
-
-    scenes = []
-    for i, match in enumerate(headers):
-        number = int(match.group(1))
-        title = match.group(2).strip()
-        # Clean title of any remaining bracket metadata
-        title = re.sub(r"\s*\[TYPE:.*?\]", "", title)
-        title = re.sub(r"\s*\[PILLAR:.*?\]", "", title)
-        title = re.sub(r"\s*\[POV:.*?\]", "", title)
-        title = title.strip()
-
-        body_start = match.end()
-        body_end = headers[i + 1].start() if i + 1 < len(headers) else len(text)
-        body = text[body_start:body_end].strip()
-
-        # Extract TYPE, PILLAR, POV from the full matched header line
-        scene_type = "UNKNOWN"
-        pov = ""
-        pillar = ""
-        if is_v25:
-            header_line = match.group(0)
-            type_m = _TYPE_RE.search(header_line)
-            if type_m:
-                scene_type = type_m.group(1).upper()
-            pov_m = _POV_RE.search(header_line)
-            if pov_m:
-                pov = pov_m.group(1).strip()
-            pillar_m = _PILLAR_RE.search(header_line)
-            if pillar_m:
-                pillar = pillar_m.group(1).upper()
-
-        scenes.append(Scene(number=number, title=title, body=body,
-                            scene_type=scene_type, pov=pov, pillar=pillar))
-
-    return scenes
+    return [
+        Scene(
+            number=ps.number,
+            title=ps.title,
+            body=ps.body,
+            scene_type=ps.scene_type,
+            pov=ps.pov,
+            pillar=ps.pillar,
+        )
+        for ps in _parse_headers(text)
+    ]
 
 
 def check_synopsis_integrity(scenes: List[Scene], intake: dict, synopsis_path: str) -> List[dict]:

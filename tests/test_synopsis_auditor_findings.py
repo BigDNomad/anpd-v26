@@ -55,7 +55,7 @@ class TestV25SceneFormat:
         assert len(scenes) == 3
         assert [s.number for s in scenes] == [1, 2, 3]
         assert scenes[0].scene_type == "ACTION"
-        assert scenes[1].scene_type == "NON-ACTION"
+        assert scenes[1].scene_type == "NON_ACTION"
         assert scenes[2].scene_type == "SUSPENSE"
 
 

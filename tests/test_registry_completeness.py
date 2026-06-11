@@ -89,3 +89,47 @@ def test_components_registry_is_not_empty():
     assert len(mc.COMPONENTS) >= 10, (
         f"COMPONENTS has only {len(mc.COMPONENTS)} entries — expected ≥10"
     )
+
+
+# ─── Inverse test: registered COMPONENTS that are never dispatched ──────────
+
+# Components that are legitimately never called via run_component_subprocess
+# because they serve other roles (non-pipeline utilities, manifest-level
+# tools, or inline-invoked components).
+_ALLOWED_UNDISPATCHED = {
+    "manifest_auditor",            # called inline by master_controller, not via run_component_subprocess
+    "preflight",                   # invoked via preflight_stub inline or subprocess
+    "book_archive",                # operator-invoked utility, no phase dispatch
+    "anpd_export",                 # operator-invoked utility, no phase dispatch
+    "scene_auditor",               # called internally by scene loop (may not appear in AST scan)
+    "character_profile_auditor",   # called internally by character_generator
+    "synopsis_summarizer",         # manifest trigger: after_phase_commit:synopsis_generator
+    "manuscript_summarizer",       # manifest trigger: after_phase_commit:manuscript_assembler
+    "outline_comparator",          # called internally by synopsis gate (not via subprocess in current code)
+}
+
+
+def test_registered_components_are_dispatched():
+    """Every COMPONENTS entry must be dispatched by at least one
+    phase_handler or master_controller call to run_component_subprocess,
+    unless it is in the allowed-undispatched set.
+
+    This catches the manuscript_assembler-class bug: a component
+    registered in COMPONENTS and manifest but never called by any
+    phase handler.
+    """
+    import master_controller as mc
+
+    referenced = _collect_all_referenced_component_names()
+    all_dispatched: set[str] = set()
+    for names in referenced.values():
+        all_dispatched |= names
+
+    registered = set(mc.COMPONENTS.keys())
+    never_dispatched = registered - all_dispatched - _ALLOWED_UNDISPATCHED
+
+    assert not never_dispatched, (
+        f"COMPONENTS entries that are never dispatched by any phase handler: "
+        f"{sorted(never_dispatched)}.  Either add dispatch in phase_handlers "
+        f"or add to _ALLOWED_UNDISPATCHED with justification."
+    )
