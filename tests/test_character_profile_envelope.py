@@ -116,6 +116,8 @@ class TestAuditorLoadProfileFile:
         p = tmp_path / "profiles.json"
         p.write_text(json.dumps(VALID_ENVELOPE_PROFILES))
         data = _load_profile_file(p, "test")
+        # Pop internal marker before checking content
+        assert data.pop('__normalized_from_envelope__', False) is True
         assert "Alice Tran" in data
         assert "characters" not in data
 
@@ -123,7 +125,15 @@ class TestAuditorLoadProfileFile:
         p = tmp_path / "profiles.json"
         p.write_text(json.dumps(FLAT_PROFILES))
         data = _load_profile_file(p, "test")
+        assert '__normalized_from_envelope__' not in data
         assert "Alice Tran" in data
+
+    def test_envelope_marker_present(self, tmp_path):
+        """Envelope-normalized data carries the legacy marker."""
+        p = tmp_path / "profiles.json"
+        p.write_text(json.dumps(VALID_ENVELOPE_PROFILES))
+        data = _load_profile_file(p, "test")
+        assert data.get('__normalized_from_envelope__') is True
 
 
 # ── Auditor: envelope key check after normalization ──────────────────────────
@@ -134,6 +144,7 @@ class TestEnvelopeKeyCheck:
         p = tmp_path / "profiles.json"
         p.write_text(json.dumps(VALID_ENVELOPE_PROFILES))
         data = _load_profile_file(p, "series-level")
+        data.pop('__normalized_from_envelope__', None)
         findings = check_no_envelope_keys(data, str(p), "series-level")
         assert len(findings) == 0
 

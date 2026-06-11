@@ -1914,16 +1914,16 @@ def _load_profile_file(path: Path, label: str) -> dict:
         )
 
     # Normalize: file may use {"characters": [list of dicts]} envelope
-    # (Schema v1.1.0 §3.4 alternate representation). Convert to
-    # {name: profile_dict} so downstream checks operate on per-character
-    # entries. This is NOT a bypass — envelope-key and all other checks
-    # still run against the normalized data.
+    # (pre-v1.1.0 legacy format). Convert to {name: profile_dict}.
+    # Mark the result so the auditor can skip v1.1.0 content checks on
+    # legacy-format data (field names differ: role vs character_role, etc.).
     if ('characters' in data
             and isinstance(data['characters'], list)):
         normalized = {
             p['name']: p for p in data['characters']
             if isinstance(p, dict) and 'name' in p
         }
+        normalized['__normalized_from_envelope__'] = True
         return normalized
 
     return data
@@ -1964,6 +1964,14 @@ def audit_character_profiles(
     series_data = _load_profile_file(series_profiles_path, "series-level")
     book_data = _load_profile_file(book_profiles_path, "book-level")
 
+    # Detect if series-level data was normalized from a pre-v1.1.0 envelope
+    # format. If so, skip v1.1.0 content checks (required fields, voice spec,
+    # skills shape, etc.) because the field schema differs (role vs
+    # character_role, psychology vs primary_trait, etc.). Structural checks
+    # (envelope keys, value-is-dict) still run on both files. The book-level
+    # file (the generator's output) always gets full checks.
+    series_is_legacy = series_data.pop('__normalized_from_envelope__', False)
+
     findings: List[dict] = []
 
     # Schema §3.4 envelope-key check (per file, both files).
@@ -1990,60 +1998,69 @@ def audit_character_profiles(
         "book-level",
     ))
 
-    # Schema §3.2 name-key match check (per file).
+    # ── Content checks below: skip series-level if legacy envelope format ──
+    # Pre-v1.1.0 envelope files use different field names and structure.
+    # Only the book-level output (the generator's product) is held to v1.1.0.
+
+    if not series_is_legacy:
+        # Schema §3.2 name-key match check (series).
+        findings.extend(check_name_key_match(
+            series_data,
+            str(series_profiles_path),
+            "series-level",
+        ))
     findings.extend(check_name_key_match(
-        series_data,
-        str(series_profiles_path),
-        "series-level",
-    ))
-    findings.extend(check_name_key_match(
         book_data,
         str(book_profiles_path),
         "book-level",
     ))
 
-    # Schema §3.2 character_role enum check (per file).
-    findings.extend(check_character_role_enum(
-        series_data,
-        str(series_profiles_path),
-        "series-level",
-    ))
+    if not series_is_legacy:
+        # Schema §3.2 character_role enum check (series).
+        findings.extend(check_character_role_enum(
+            series_data,
+            str(series_profiles_path),
+            "series-level",
+        ))
     findings.extend(check_character_role_enum(
         book_data,
         str(book_profiles_path),
         "book-level",
     ))
 
-    # Schema §5–§9 required-field completeness check (per file).
-    findings.extend(check_required_fields(
-        series_data,
-        str(series_profiles_path),
-        "series-level",
-    ))
+    if not series_is_legacy:
+        # Schema §5–§9 required-field completeness check (series).
+        findings.extend(check_required_fields(
+            series_data,
+            str(series_profiles_path),
+            "series-level",
+        ))
     findings.extend(check_required_fields(
         book_data,
         str(book_profiles_path),
         "book-level",
     ))
 
-    # Schema §5 voice_specification core fields check (per file).
-    findings.extend(check_voice_specification_core(
-        series_data,
-        str(series_profiles_path),
-        "series-level",
-    ))
+    if not series_is_legacy:
+        # Schema §5 voice_specification core fields check (series).
+        findings.extend(check_voice_specification_core(
+            series_data,
+            str(series_profiles_path),
+            "series-level",
+        ))
     findings.extend(check_voice_specification_core(
         book_data,
         str(book_profiles_path),
         "book-level",
     ))
 
-    # Schema §12.4 skills shape check (per file).
-    findings.extend(check_skills_shape(
-        series_data,
-        str(series_profiles_path),
-        "series-level",
-    ))
+    if not series_is_legacy:
+        # Schema §12.4 skills shape check (series).
+        findings.extend(check_skills_shape(
+            series_data,
+            str(series_profiles_path),
+            "series-level",
+        ))
     findings.extend(check_skills_shape(
         book_data,
         str(book_profiles_path),
@@ -2107,12 +2124,13 @@ def audit_character_profiles(
         name_registry,
     ))
 
-    # Schema §5/§8/§9 trait distinctness check (per file).
-    findings.extend(check_trait_distinctness(
-        series_data,
-        str(series_profiles_path),
-        "series-level",
-    ))
+    if not series_is_legacy:
+        # Schema §5/§8/§9 trait distinctness check (series).
+        findings.extend(check_trait_distinctness(
+            series_data,
+            str(series_profiles_path),
+            "series-level",
+        ))
     findings.extend(check_trait_distinctness(
         book_data,
         str(book_profiles_path),
@@ -2122,13 +2140,17 @@ def audit_character_profiles(
     # Build merged cast for cross-file checks.
     # If merge fails (envelope keys, name collision), per-file checks
     # already produced findings; skip merged-cast checks defensively.
+    # When series-level is legacy envelope format, skip merge — the field
+    # schema difference would cause ProfileMergeError or produce invalid
+    # merged data.
     merged_cast: dict = None
-    try:
-        merged_cast = merge_character_profiles(
-            series_profiles_path, book_profiles_path,
-        )
-    except ProfileMergeError:
-        merged_cast = None
+    if not series_is_legacy:
+        try:
+            merged_cast = merge_character_profiles(
+                series_profiles_path, book_profiles_path,
+            )
+        except ProfileMergeError:
+            merged_cast = None
 
     if merged_cast is not None:
         # Schema §10/§12.6 relationship symmetry (merged cast).
@@ -2157,12 +2179,13 @@ def audit_character_profiles(
         except (json.JSONDecodeError, OSError):
             series_bible = None
 
-    findings.extend(check_series_bible_match(
-        series_data,
-        str(series_profiles_path),
-        "series-level",
-        series_bible,
-    ))
+    if not series_is_legacy:
+        findings.extend(check_series_bible_match(
+            series_data,
+            str(series_profiles_path),
+            "series-level",
+            series_bible,
+        ))
     findings.extend(check_series_bible_match(
         book_data,
         str(book_profiles_path),
