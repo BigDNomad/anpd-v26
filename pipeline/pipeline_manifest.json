@@ -1,12 +1,12 @@
 {
-  "manifest_version": "0.3.0",
+  "manifest_version": "0.4.0",
   "schema_version_required": "1.0.0",
-  "last_updated": "2026-05-14 08:45:00 UTC",
-  "last_git_commit": "6ce39cc",
+  "last_updated": "2026-06-11 22:00:00 UTC",
+  "last_git_commit": "7f609a4",
   "metadata": {
     "base_dir": "/anpd/v26",
     "mode": "new_book",
-    "version_notes": "V25 self-contained pipeline. Dispatch 14: promoted 11 entries from non_pipeline_components to pipeline_components."
+    "version_notes": "V26 manifest truth pass: manuscript_auditor→manuscript_auditor_v25; added formatter, book_archive, anpd_export."
   },
   "pipeline_components": [
     {
@@ -307,8 +307,8 @@
     },
     {
       "component_name": "manuscript_auditor",
-      "file_path": "/anpd/v26/pipeline/manuscript_auditor.py",
-      "entry_function": "run_manuscript_audit",
+      "file_path": "/anpd/v26/pipeline/manuscript_auditor_v25.py",
+      "entry_function": "run_audit",
       "phase": 5,
       "execution_order": 1,
       "required": true,
@@ -374,6 +374,70 @@
         { "path": "/anpd/v26/series/{series}/{bNN}/out/reviews/manuscript_review.docx", "schema": null, "consumed_by": ["operator"] }
       ],
       "verification_rules_active": ["R001", "R002", "R005"]
+    },
+    {
+      "component_name": "formatter",
+      "file_path": "/anpd/v26/pipeline/formatter.py",
+      "entry_function": "main",
+      "phase": 8,
+      "execution_order": 1,
+      "required": true,
+      "is_stub": false,
+      "replaces_in_phase": null,
+      "optional_by_config": null,
+      "multi_instance": false,
+      "loop_over": null,
+      "max_runtime_seconds": 120,
+      "idempotent": true,
+      "inputs": [
+        { "path": "/anpd/v26/series/{series}/{bNN}/out/chapters/ch*_*.md", "produced_by": "scene_formatter", "schema": null }
+      ],
+      "outputs": [
+        { "path": "/anpd/v26/series/{series}/{bNN}/out/*.docx", "schema": null, "consumed_by": ["operator"] }
+      ],
+      "verification_rules_active": ["R001", "R005"]
+    },
+    {
+      "component_name": "book_archive",
+      "file_path": "/anpd/v26/pipeline/book_archive.py",
+      "entry_function": "main",
+      "phase": null,
+      "execution_order": null,
+      "required": false,
+      "is_stub": false,
+      "replaces_in_phase": null,
+      "optional_by_config": null,
+      "multi_instance": false,
+      "loop_over": null,
+      "max_runtime_seconds": 300,
+      "idempotent": true,
+      "inputs": [
+        { "path": "/anpd/v26/series/{series}/{bNN}/", "produced_by": "operator", "schema": null }
+      ],
+      "outputs": [
+        { "path": "/anpd/v26/series/{series}/{bNN}/out/_book_archive_{slug}/", "schema": null, "consumed_by": ["operator"] }
+      ],
+      "verification_rules_active": []
+    },
+    {
+      "component_name": "anpd_export",
+      "file_path": "/anpd/v26/pipeline/anpd_export.py",
+      "entry_function": "main",
+      "phase": null,
+      "execution_order": null,
+      "required": false,
+      "is_stub": false,
+      "replaces_in_phase": null,
+      "optional_by_config": null,
+      "multi_instance": false,
+      "loop_over": null,
+      "max_runtime_seconds": 60,
+      "idempotent": true,
+      "inputs": [
+        { "path": "/anpd/v26/series/{series}/{bNN}/out/*", "produced_by": "operator", "schema": null }
+      ],
+      "outputs": [],
+      "verification_rules_active": []
     }
   ],
   "non_pipeline_components": [
