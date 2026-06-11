@@ -118,7 +118,7 @@ class RuntimeVerifier:
         self._series_name = series_name or metadata.get("series", "")
         self._book_number = book_number or metadata.get("book_number", 1)
         b_nn = f"b{self._book_number:02d}"
-        base_dir = metadata.get("base_dir", "/anpd/v25")
+        base_dir = metadata.get("base_dir", "/anpd/v26")
         self._book_dir = Path(base_dir) / "series" / self._series_name / b_nn
 
         # State accumulated during run (per design doc §7).

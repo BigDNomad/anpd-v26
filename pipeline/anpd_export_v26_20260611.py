@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-anpd_export — Copy files from /anpd/v25/series/ with V25 filename convention.
+anpd_export — Copy files from /anpd/v26/series/ with V25 filename convention.
 
 Reads series_config.json for slug information, applies the filename mapping
 table from Data Standards §3, and copies the file to the destination with
@@ -39,7 +39,7 @@ from publish_gate import evaluate_clearance
 
 # ── Constants ────────────────────────────────────────────────────────────────
 
-SERIES_ROOT = "/anpd/v25/series"
+SERIES_ROOT = "/anpd/v26/series"
 DEFAULT_DEST = "/tmp/anpd_export"
 
 # Series-level files: use series_slug
@@ -353,10 +353,10 @@ def export_file(
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="anpd_export.py",
-        description="Export files from /anpd/v25/series/ with V25 filename convention",
+        description="Export files from /anpd/v26/series/ with V25 filename convention",
     )
     parser.add_argument("source_file", nargs="?", default=None,
-                        help="Path to file inside /anpd/v25/series/")
+                        help="Path to file inside /anpd/v26/series/")
     parser.add_argument("--dest", default=DEFAULT_DEST,
                         help=f"Destination directory (default: {DEFAULT_DEST})")
     parser.add_argument("--audit-report", default=None,

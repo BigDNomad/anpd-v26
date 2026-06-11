@@ -834,7 +834,7 @@ def handle_capsule_write(args, pipeline_state, effective_config) -> dict:
     series = effective_config.get("series_directory", "")
     intake = _safe_load_json(args.intake) or {}
     book_number = intake.get("book_number", 0)
-    capsule_path = f"/anpd/v25/series/{series}/b{book_number:02d}/capsule_manifest.json"
+    capsule_path = f"/anpd/v26/series/{series}/b{book_number:02d}/capsule_manifest.json"
     pipeline_state["capsule_paths"]["forward"] = capsule_path
 
     return {
@@ -1132,7 +1132,7 @@ def _assemble_scene_bundle(
         os.path.join(args.series_dir, "series_bible.json")
     ) or {}
     banned_phrases = _safe_load_json(
-        "/anpd/v25/shared/banned_ai_phrases.json"
+        "/anpd/v26/shared/banned_ai_phrases.json"
     ) or {"phrases": []}
     character_profiles = _safe_load_json(character_profiles_path) if character_profiles_path else {}
     synopsis_text = _safe_read_text(synopsis_path) if synopsis_path else ""
@@ -1194,7 +1194,7 @@ def _attempt_state_extraction(
             phase=5,
             error_type="Class A",
             error_message=f"state_tracker.py not found at {state_script}",
-            suggested_fix="ship state_tracker.py to /anpd/v25/pipeline/",
+            suggested_fix="ship state_tracker.py to /anpd/v26/pipeline/",
             pipeline_state_description=f"halted at scene {scene_num} state extraction",
         )
         return False

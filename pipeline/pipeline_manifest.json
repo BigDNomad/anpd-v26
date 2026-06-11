@@ -4,14 +4,14 @@
   "last_updated": "2026-05-14 08:45:00 UTC",
   "last_git_commit": "6ce39cc",
   "metadata": {
-    "base_dir": "/anpd/v25",
+    "base_dir": "/anpd/v26",
     "mode": "new_book",
     "version_notes": "V25 self-contained pipeline. Dispatch 14: promoted 11 entries from non_pipeline_components to pipeline_components."
   },
   "pipeline_components": [
     {
       "component_name": "preflight",
-      "file_path": "/anpd/v25/pipeline/preflight.py",
+      "file_path": "/anpd/v26/pipeline/preflight.py",
       "entry_function": "run_preflight",
       "phase": 0,
       "execution_order": 1,
@@ -24,17 +24,17 @@
       "max_runtime_seconds": 60,
       "idempotent": true,
       "inputs": [
-        { "path": "/anpd/v25/series/{series}/{bNN}/work/intake.json", "produced_by": "operator", "schema": "intake" },
-        { "path": "/anpd/v25/series/{series}/series_config.json", "produced_by": "operator", "schema": null }
+        { "path": "/anpd/v26/series/{series}/{bNN}/work/intake.json", "produced_by": "operator", "schema": "intake" },
+        { "path": "/anpd/v26/series/{series}/series_config.json", "produced_by": "operator", "schema": null }
       ],
       "outputs": [
-        { "path": "/anpd/v25/series/{series}/{bNN}/out/reports/preflight_report.json", "schema": null, "consumed_by": ["master_controller"] }
+        { "path": "/anpd/v26/series/{series}/{bNN}/out/reports/preflight_report.json", "schema": null, "consumed_by": ["master_controller"] }
       ],
       "verification_rules_active": ["R001", "R002", "R005", "R006", "R007"]
     },
     {
       "component_name": "manifest_auditor",
-      "file_path": "/anpd/v25/pipeline/manifest_auditor.py",
+      "file_path": "/anpd/v26/pipeline/manifest_auditor.py",
       "entry_function": "run_manifest_audit",
       "phase": 0,
       "execution_order": 2,
@@ -47,17 +47,17 @@
       "max_runtime_seconds": 60,
       "idempotent": true,
       "inputs": [
-        { "path": "/anpd/v25/pipeline/pipeline_manifest.json", "produced_by": "operator", "schema": null },
-        { "path": "/anpd/v25/pipeline/master_controller.py", "produced_by": "operator", "schema": null }
+        { "path": "/anpd/v26/pipeline/pipeline_manifest.json", "produced_by": "operator", "schema": null },
+        { "path": "/anpd/v26/pipeline/master_controller.py", "produced_by": "operator", "schema": null }
       ],
       "outputs": [
-        { "path": "/anpd/v25/series/{series}/{bNN}/out/manifest_audits/manifest_audit.json", "schema": null, "consumed_by": ["master_controller"] }
+        { "path": "/anpd/v26/series/{series}/{bNN}/out/manifest_audits/manifest_audit.json", "schema": null, "consumed_by": ["master_controller"] }
       ],
       "verification_rules_active": ["R001", "R002", "R005", "R006", "R007"]
     },
     {
       "component_name": "synopsis_generator",
-      "file_path": "/anpd/v25/pipeline/synopsis_generator.py",
+      "file_path": "/anpd/v26/pipeline/synopsis_generator.py",
       "entry_function": "main",
       "phase": 1,
       "execution_order": 1,
@@ -70,21 +70,21 @@
       "max_runtime_seconds": 900,
       "idempotent": true,
       "inputs": [
-        { "path": "/anpd/v25/series/{series}/{bNN}/work/intake.json", "produced_by": "operator", "schema": "intake" },
-        { "path": "/anpd/v25/series/{series}/{bNN}/work/outline.md", "produced_by": "operator", "schema": "outline" },
-        { "path": "/anpd/v25/series/{series}/series_bible.json", "produced_by": "operator", "schema": "series_bible" },
-        { "path": "/anpd/v25/series/{series}/character_profiles.json", "produced_by": "operator", "schema": "character_profiles" },
-        { "path": "/anpd/v25/principles/craft_principles.json", "produced_by": "operator", "schema": null }
+        { "path": "/anpd/v26/series/{series}/{bNN}/work/intake.json", "produced_by": "operator", "schema": "intake" },
+        { "path": "/anpd/v26/series/{series}/{bNN}/work/outline.md", "produced_by": "operator", "schema": "outline" },
+        { "path": "/anpd/v26/series/{series}/series_bible.json", "produced_by": "operator", "schema": "series_bible" },
+        { "path": "/anpd/v26/series/{series}/character_profiles.json", "produced_by": "operator", "schema": "character_profiles" },
+        { "path": "/anpd/v26/principles/craft_principles.json", "produced_by": "operator", "schema": null }
       ],
       "outputs": [
-        { "path": "/anpd/v25/series/{series}/{bNN}/work/synopsis.md", "schema": null, "consumed_by": ["synopsis_auditor", "outline_comparator", "scene_writer"] },
-        { "path": "/anpd/v25/series/{series}/{bNN}/work/synopsis_generator_receipt.json", "schema": null, "consumed_by": [] }
+        { "path": "/anpd/v26/series/{series}/{bNN}/work/synopsis.md", "schema": null, "consumed_by": ["synopsis_auditor", "outline_comparator", "scene_writer"] },
+        { "path": "/anpd/v26/series/{series}/{bNN}/work/synopsis_generator_receipt.json", "schema": null, "consumed_by": [] }
       ],
       "verification_rules_active": ["R001", "R002", "R005", "R006", "R007"]
     },
     {
       "component_name": "outline_comparator",
-      "file_path": "/anpd/v25/pipeline/outline_comparator.py",
+      "file_path": "/anpd/v26/pipeline/outline_comparator.py",
       "entry_function": "compare_outline_to_synopsis",
       "phase": 1,
       "execution_order": 2,
@@ -97,18 +97,18 @@
       "max_runtime_seconds": 300,
       "idempotent": true,
       "inputs": [
-        { "path": "/anpd/v25/series/{series}/{bNN}/work/synopsis.md", "produced_by": "synopsis_generator", "schema": null },
-        { "path": "/anpd/v25/series/{series}/{bNN}/work/outline.md", "produced_by": "operator", "schema": "outline" },
-        { "path": "/anpd/v25/series/{series}/{bNN}/work/intake.json", "produced_by": "operator", "schema": "intake" }
+        { "path": "/anpd/v26/series/{series}/{bNN}/work/synopsis.md", "produced_by": "synopsis_generator", "schema": null },
+        { "path": "/anpd/v26/series/{series}/{bNN}/work/outline.md", "produced_by": "operator", "schema": "outline" },
+        { "path": "/anpd/v26/series/{series}/{bNN}/work/intake.json", "produced_by": "operator", "schema": "intake" }
       ],
       "outputs": [
-        { "path": "/anpd/v25/series/{series}/{bNN}/work/outline_comparison_findings.json", "schema": null, "consumed_by": ["master_controller"] }
+        { "path": "/anpd/v26/series/{series}/{bNN}/work/outline_comparison_findings.json", "schema": null, "consumed_by": ["master_controller"] }
       ],
       "verification_rules_active": ["R001", "R002", "R005", "R006", "R007"]
     },
     {
       "component_name": "synopsis_auditor",
-      "file_path": "/anpd/v25/pipeline/synopsis_auditor.py",
+      "file_path": "/anpd/v26/pipeline/synopsis_auditor.py",
       "entry_function": "main",
       "phase": 1,
       "execution_order": 3,
@@ -121,22 +121,22 @@
       "max_runtime_seconds": 300,
       "idempotent": true,
       "inputs": [
-        { "path": "/anpd/v25/series/{series}/{bNN}/work/synopsis.md", "produced_by": "synopsis_generator", "schema": null },
-        { "path": "/anpd/v25/series/{series}/{bNN}/work/intake.json", "produced_by": "operator", "schema": "intake" },
-        { "path": "/anpd/v25/series/{series}/series_config.json", "produced_by": "operator", "schema": null },
-        { "path": "/anpd/v25/series/{series}/character_profiles.json", "produced_by": "operator", "schema": "character_profiles" },
-        { "path": "/anpd/v25/series/{series}/banned_phrases.json", "produced_by": "operator", "schema": null }
+        { "path": "/anpd/v26/series/{series}/{bNN}/work/synopsis.md", "produced_by": "synopsis_generator", "schema": null },
+        { "path": "/anpd/v26/series/{series}/{bNN}/work/intake.json", "produced_by": "operator", "schema": "intake" },
+        { "path": "/anpd/v26/series/{series}/series_config.json", "produced_by": "operator", "schema": null },
+        { "path": "/anpd/v26/series/{series}/character_profiles.json", "produced_by": "operator", "schema": "character_profiles" },
+        { "path": "/anpd/v26/series/{series}/banned_phrases.json", "produced_by": "operator", "schema": null }
       ],
       "outputs": [
-        { "path": "/anpd/v25/series/{series}/{bNN}/work/synopsis_findings.json", "schema": null, "consumed_by": ["master_controller"] },
-        { "path": "/anpd/v25/series/{series}/{bNN}/work/synopsis_audit_report.json", "schema": null, "consumed_by": ["master_controller"] },
-        { "path": "/anpd/v25/series/{series}/{bNN}/work/synopsis_audit_report.md", "schema": null, "consumed_by": ["master_controller"] }
+        { "path": "/anpd/v26/series/{series}/{bNN}/work/synopsis_findings.json", "schema": null, "consumed_by": ["master_controller"] },
+        { "path": "/anpd/v26/series/{series}/{bNN}/work/synopsis_audit_report.json", "schema": null, "consumed_by": ["master_controller"] },
+        { "path": "/anpd/v26/series/{series}/{bNN}/work/synopsis_audit_report.md", "schema": null, "consumed_by": ["master_controller"] }
       ],
       "verification_rules_active": ["R001", "R002", "R003", "R005", "R006", "R007"]
     },
     {
       "component_name": "synopsis_summarizer",
-      "file_path": "/anpd/v25/pipeline/synopsis_summarizer.py",
+      "file_path": "/anpd/v26/pipeline/synopsis_summarizer.py",
       "entry_function": "main",
       "phase": 1,
       "execution_order": 4,
@@ -151,18 +151,18 @@
       "failure_mode": "advisory",
       "trigger": "after_phase_commit:synopsis_generator",
       "inputs": [
-        { "path": "/anpd/v25/series/{series}/{bNN}/work/synopsis.md", "produced_by": "synopsis_generator", "schema": null },
-        { "path": "/anpd/v25/series/{series}/{bNN}/work/intake.json", "produced_by": "operator", "schema": "intake" },
-        { "path": "/anpd/v25/series/{series}/series_config.json", "produced_by": "operator", "schema": null }
+        { "path": "/anpd/v26/series/{series}/{bNN}/work/synopsis.md", "produced_by": "synopsis_generator", "schema": null },
+        { "path": "/anpd/v26/series/{series}/{bNN}/work/intake.json", "produced_by": "operator", "schema": "intake" },
+        { "path": "/anpd/v26/series/{series}/series_config.json", "produced_by": "operator", "schema": null }
       ],
       "outputs": [
-        { "path": "/anpd/v25/series/{series}/{bNN}/out/reviews/synopsis_review.docx", "schema": null, "consumed_by": ["operator"] }
+        { "path": "/anpd/v26/series/{series}/{bNN}/out/reviews/synopsis_review.docx", "schema": null, "consumed_by": ["operator"] }
       ],
       "verification_rules_active": ["R001", "R002", "R005"]
     },
     {
       "component_name": "character_generator",
-      "file_path": "/anpd/v25/pipeline/character_generator.py",
+      "file_path": "/anpd/v26/pipeline/character_generator.py",
       "entry_function": "main",
       "phase": 2,
       "execution_order": 1,
@@ -175,21 +175,21 @@
       "max_runtime_seconds": 600,
       "idempotent": true,
       "inputs": [
-        { "path": "/anpd/v25/series/{series}/{bNN}/work/intake.json", "produced_by": "operator", "schema": "intake" },
-        { "path": "/anpd/v25/series/{series}/series_bible.json", "produced_by": "operator", "schema": "series_bible" },
-        { "path": "/anpd/v25/series/{series}/character_profiles.json", "produced_by": "operator", "schema": "character_profiles" },
-        { "path": "/anpd/v25/series/{series}/banned_phrases.json", "produced_by": "operator", "schema": null },
-        { "path": "/anpd/v25/series/{series}/{bNN}/work/synopsis.md", "produced_by": "synopsis_generator", "schema": null }
+        { "path": "/anpd/v26/series/{series}/{bNN}/work/intake.json", "produced_by": "operator", "schema": "intake" },
+        { "path": "/anpd/v26/series/{series}/series_bible.json", "produced_by": "operator", "schema": "series_bible" },
+        { "path": "/anpd/v26/series/{series}/character_profiles.json", "produced_by": "operator", "schema": "character_profiles" },
+        { "path": "/anpd/v26/series/{series}/banned_phrases.json", "produced_by": "operator", "schema": null },
+        { "path": "/anpd/v26/series/{series}/{bNN}/work/synopsis.md", "produced_by": "synopsis_generator", "schema": null }
       ],
       "outputs": [
-        { "path": "/anpd/v25/series/{series}/{bNN}/work/character_profiles.json", "schema": null, "consumed_by": ["character_profile_auditor", "scene_writer"] },
-        { "path": "/anpd/v25/series/{series}/{bNN}/work/character_generation_findings.json", "schema": null, "consumed_by": ["master_controller"] }
+        { "path": "/anpd/v26/series/{series}/{bNN}/work/character_profiles.json", "schema": null, "consumed_by": ["character_profile_auditor", "scene_writer"] },
+        { "path": "/anpd/v26/series/{series}/{bNN}/work/character_generation_findings.json", "schema": null, "consumed_by": ["master_controller"] }
       ],
       "verification_rules_active": ["R001", "R002", "R003", "R005", "R006", "R007"]
     },
     {
       "component_name": "character_profile_auditor",
-      "file_path": "/anpd/v25/pipeline/character_profile_auditor.py",
+      "file_path": "/anpd/v26/pipeline/character_profile_auditor.py",
       "entry_function": "audit_character_profiles",
       "phase": 2,
       "execution_order": 2,
@@ -202,17 +202,17 @@
       "max_runtime_seconds": 300,
       "idempotent": true,
       "inputs": [
-        { "path": "/anpd/v25/series/{series}/{bNN}/work/character_profiles.json", "produced_by": "character_generator", "schema": null },
-        { "path": "/anpd/v25/series/{series}/character_profiles.json", "produced_by": "operator", "schema": "character_profiles" },
-        { "path": "/anpd/v25/series/{series}/series_bible.json", "produced_by": "operator", "schema": "series_bible" },
-        { "path": "/anpd/v25/series/{series}/banned_phrases.json", "produced_by": "operator", "schema": null }
+        { "path": "/anpd/v26/series/{series}/{bNN}/work/character_profiles.json", "produced_by": "character_generator", "schema": null },
+        { "path": "/anpd/v26/series/{series}/character_profiles.json", "produced_by": "operator", "schema": "character_profiles" },
+        { "path": "/anpd/v26/series/{series}/series_bible.json", "produced_by": "operator", "schema": "series_bible" },
+        { "path": "/anpd/v26/series/{series}/banned_phrases.json", "produced_by": "operator", "schema": null }
       ],
       "outputs": [],
       "verification_rules_active": ["R005"]
     },
     {
       "component_name": "scene_writer",
-      "file_path": "/anpd/v25/pipeline/scene_writer.py",
+      "file_path": "/anpd/v26/pipeline/scene_writer.py",
       "entry_function": "write_scene",
       "phase": 3,
       "execution_order": 1,
@@ -225,19 +225,19 @@
       "max_runtime_seconds": 600,
       "idempotent": false,
       "inputs": [
-        { "path": "/anpd/v25/series/{series}/{bNN}/work/synopsis.md", "produced_by": "synopsis_generator", "schema": null },
-        { "path": "/anpd/v25/series/{series}/series_bible.json", "produced_by": "operator", "schema": "series_bible" },
-        { "path": "/anpd/v25/series/{series}/character_profiles.json", "produced_by": "operator", "schema": "character_profiles" },
-        { "path": "/anpd/v25/principles/craft_principles.json", "produced_by": "operator", "schema": null }
+        { "path": "/anpd/v26/series/{series}/{bNN}/work/synopsis.md", "produced_by": "synopsis_generator", "schema": null },
+        { "path": "/anpd/v26/series/{series}/series_bible.json", "produced_by": "operator", "schema": "series_bible" },
+        { "path": "/anpd/v26/series/{series}/character_profiles.json", "produced_by": "operator", "schema": "character_profiles" },
+        { "path": "/anpd/v26/principles/craft_principles.json", "produced_by": "operator", "schema": null }
       ],
       "outputs": [
-        { "path": "/anpd/v25/series/{series}/{bNN}/out/scenes/sc{sceneNN}_*.md", "schema": null, "consumed_by": ["scene_auditor", "state_tracker", "manuscript_assembler"] }
+        { "path": "/anpd/v26/series/{series}/{bNN}/out/scenes/sc{sceneNN}_*.md", "schema": null, "consumed_by": ["scene_auditor", "state_tracker", "manuscript_assembler"] }
       ],
       "verification_rules_active": ["R001", "R002", "R005", "R006"]
     },
     {
       "component_name": "scene_auditor",
-      "file_path": "/anpd/v25/pipeline/scene_auditor.py",
+      "file_path": "/anpd/v26/pipeline/scene_auditor.py",
       "entry_function": "audit_scene",
       "phase": 3,
       "execution_order": 2,
@@ -250,18 +250,18 @@
       "max_runtime_seconds": 300,
       "idempotent": true,
       "inputs": [
-        { "path": "/anpd/v25/series/{series}/{bNN}/out/scenes/sc{sceneNN}_*.md", "produced_by": "scene_writer", "schema": null },
-        { "path": "/anpd/v25/principles/craft_principles.json", "produced_by": "operator", "schema": null },
-        { "path": "/anpd/v25/series/{series}/series_bible.json", "produced_by": "operator", "schema": "series_bible" }
+        { "path": "/anpd/v26/series/{series}/{bNN}/out/scenes/sc{sceneNN}_*.md", "produced_by": "scene_writer", "schema": null },
+        { "path": "/anpd/v26/principles/craft_principles.json", "produced_by": "operator", "schema": null },
+        { "path": "/anpd/v26/series/{series}/series_bible.json", "produced_by": "operator", "schema": "series_bible" }
       ],
       "outputs": [
-        { "path": "/anpd/v25/series/{series}/{bNN}/out/audits/sc{NN}_audit.json", "schema": null, "consumed_by": ["master_controller"] }
+        { "path": "/anpd/v26/series/{series}/{bNN}/out/audits/sc{NN}_audit.json", "schema": null, "consumed_by": ["master_controller"] }
       ],
       "verification_rules_active": ["R001", "R002", "R005", "R006"]
     },
     {
       "component_name": "state_tracker",
-      "file_path": "/anpd/v25/pipeline/state_tracker.py",
+      "file_path": "/anpd/v26/pipeline/state_tracker.py",
       "entry_function": "run_state_tracker",
       "phase": 3,
       "execution_order": 3,
@@ -274,17 +274,17 @@
       "max_runtime_seconds": 120,
       "idempotent": true,
       "inputs": [
-        { "path": "/anpd/v25/series/{series}/{bNN}/out/scenes/sc{sceneNN}_*.md", "produced_by": "scene_writer", "schema": null },
-        { "path": "/anpd/v25/series/{series}/{bNN}/out/state/state_after_sc{sceneNN_minus_1}.json", "produced_by": "state_tracker", "schema": null }
+        { "path": "/anpd/v26/series/{series}/{bNN}/out/scenes/sc{sceneNN}_*.md", "produced_by": "scene_writer", "schema": null },
+        { "path": "/anpd/v26/series/{series}/{bNN}/out/state/state_after_sc{sceneNN_minus_1}.json", "produced_by": "state_tracker", "schema": null }
       ],
       "outputs": [
-        { "path": "/anpd/v25/series/{series}/{bNN}/out/state/state_after_sc{sceneNN}.json", "schema": null, "consumed_by": ["scene_writer", "manuscript_auditor"] }
+        { "path": "/anpd/v26/series/{series}/{bNN}/out/state/state_after_sc{sceneNN}.json", "schema": null, "consumed_by": ["scene_writer", "manuscript_auditor"] }
       ],
       "verification_rules_active": ["R001", "R002", "R003", "R005", "R006", "R007"]
     },
     {
       "component_name": "scene_formatter",
-      "file_path": "/anpd/v25/pipeline/scene_formatter.py",
+      "file_path": "/anpd/v26/pipeline/scene_formatter.py",
       "entry_function": "run_scene_formatter",
       "phase": 4,
       "execution_order": 1,
@@ -297,17 +297,17 @@
       "max_runtime_seconds": 60,
       "idempotent": true,
       "inputs": [
-        { "path": "/anpd/v25/series/{series}/{bNN}/out/scenes/sc*_*.md", "produced_by": "scene_writer", "schema": null },
-        { "path": "/anpd/v25/series/{series}/{bNN}/work/synopsis.md", "produced_by": "synopsis_generator", "schema": null }
+        { "path": "/anpd/v26/series/{series}/{bNN}/out/scenes/sc*_*.md", "produced_by": "scene_writer", "schema": null },
+        { "path": "/anpd/v26/series/{series}/{bNN}/work/synopsis.md", "produced_by": "synopsis_generator", "schema": null }
       ],
       "outputs": [
-        { "path": "/anpd/v25/series/{series}/{bNN}/out/chapters/ch*_*.md", "schema": null, "consumed_by": ["manuscript_auditor", "manuscript_assembler"] }
+        { "path": "/anpd/v26/series/{series}/{bNN}/out/chapters/ch*_*.md", "schema": null, "consumed_by": ["manuscript_auditor", "manuscript_assembler"] }
       ],
       "verification_rules_active": ["R001", "R002", "R005", "R007"]
     },
     {
       "component_name": "manuscript_auditor",
-      "file_path": "/anpd/v25/pipeline/manuscript_auditor.py",
+      "file_path": "/anpd/v26/pipeline/manuscript_auditor.py",
       "entry_function": "run_manuscript_audit",
       "phase": 5,
       "execution_order": 1,
@@ -320,16 +320,16 @@
       "max_runtime_seconds": 600,
       "idempotent": false,
       "inputs": [
-        { "path": "/anpd/v25/series/{series}/{bNN}/out/chapters/ch*_*.md", "produced_by": "scene_formatter", "schema": null },
-        { "path": "/anpd/v25/series/{series}/{bNN}/work/intake.json", "produced_by": "operator", "schema": "intake" },
-        { "path": "/anpd/v25/series/{series}/banned_phrases.json", "produced_by": "operator", "schema": null }
+        { "path": "/anpd/v26/series/{series}/{bNN}/out/chapters/ch*_*.md", "produced_by": "scene_formatter", "schema": null },
+        { "path": "/anpd/v26/series/{series}/{bNN}/work/intake.json", "produced_by": "operator", "schema": "intake" },
+        { "path": "/anpd/v26/series/{series}/banned_phrases.json", "produced_by": "operator", "schema": null }
       ],
       "outputs": [],
       "verification_rules_active": ["R005", "R007"]
     },
     {
       "component_name": "manuscript_assembler",
-      "file_path": "/anpd/v25/pipeline/manuscript_assembler.py",
+      "file_path": "/anpd/v26/pipeline/manuscript_assembler.py",
       "entry_function": "assemble_manuscript",
       "phase": 6,
       "execution_order": 1,
@@ -342,16 +342,16 @@
       "max_runtime_seconds": 120,
       "idempotent": true,
       "inputs": [
-        { "path": "/anpd/v25/series/{series}/{bNN}/out/chapters/ch*_*.md", "produced_by": "scene_formatter", "schema": null }
+        { "path": "/anpd/v26/series/{series}/{bNN}/out/chapters/ch*_*.md", "produced_by": "scene_formatter", "schema": null }
       ],
       "outputs": [
-        { "path": "/anpd/v25/series/{series}/{bNN}/out/manuscript.md", "schema": null, "consumed_by": ["manuscript_auditor", "manuscript_summarizer"] }
+        { "path": "/anpd/v26/series/{series}/{bNN}/out/manuscript.md", "schema": null, "consumed_by": ["manuscript_auditor", "manuscript_summarizer"] }
       ],
       "verification_rules_active": ["R001", "R002", "R005", "R006", "R007"]
     },
     {
       "component_name": "manuscript_summarizer",
-      "file_path": "/anpd/v25/pipeline/manuscript_summarizer.py",
+      "file_path": "/anpd/v26/pipeline/manuscript_summarizer.py",
       "entry_function": "main",
       "phase": 6,
       "execution_order": 2,
@@ -366,12 +366,12 @@
       "failure_mode": "advisory",
       "trigger": "after_phase_commit:manuscript_assembler",
       "inputs": [
-        { "path": "/anpd/v25/series/{series}/{bNN}/out/manuscript.md", "produced_by": "manuscript_assembler", "schema": null },
-        { "path": "/anpd/v25/series/{series}/{bNN}/work/intake.json", "produced_by": "operator", "schema": "intake" },
-        { "path": "/anpd/v25/series/{series}/series_config.json", "produced_by": "operator", "schema": null }
+        { "path": "/anpd/v26/series/{series}/{bNN}/out/manuscript.md", "produced_by": "manuscript_assembler", "schema": null },
+        { "path": "/anpd/v26/series/{series}/{bNN}/work/intake.json", "produced_by": "operator", "schema": "intake" },
+        { "path": "/anpd/v26/series/{series}/series_config.json", "produced_by": "operator", "schema": null }
       ],
       "outputs": [
-        { "path": "/anpd/v25/series/{series}/{bNN}/out/reviews/manuscript_review.docx", "schema": null, "consumed_by": ["operator"] }
+        { "path": "/anpd/v26/series/{series}/{bNN}/out/reviews/manuscript_review.docx", "schema": null, "consumed_by": ["operator"] }
       ],
       "verification_rules_active": ["R001", "R002", "R005"]
     }
@@ -379,105 +379,105 @@
   "non_pipeline_components": [
     {
       "component_name": "findings",
-      "file_path": "/anpd/v25/pipeline/findings.py",
+      "file_path": "/anpd/v26/pipeline/findings.py",
       "entry_function": "",
       "role": "shared data structures for auditor findings",
       "consumed_by": ["synopsis_auditor", "character_profile_auditor", "manuscript_auditor", "scene_auditor", "manifest_auditor"]
     },
     {
       "component_name": "config_resolver",
-      "file_path": "/anpd/v25/pipeline/config_resolver.py",
+      "file_path": "/anpd/v26/pipeline/config_resolver.py",
       "entry_function": "resolve_config",
       "role": "effective_config resolution from series_config + book overlays",
       "consumed_by": ["master_controller"]
     },
     {
       "component_name": "llm_client",
-      "file_path": "/anpd/v25/pipeline/llm_client.py",
+      "file_path": "/anpd/v26/pipeline/llm_client.py",
       "entry_function": "call_llm",
       "role": "multi-provider LLM wrapper (Anthropic + OpenAI)",
       "consumed_by": ["synopsis_generator", "scene_writer", "scene_auditor", "synopsis_auditor", "outline_comparator"]
     },
     {
       "component_name": "pipeline_receipt_writer",
-      "file_path": "/anpd/v25/pipeline/pipeline_receipt_writer.py",
+      "file_path": "/anpd/v26/pipeline/pipeline_receipt_writer.py",
       "entry_function": "write_receipt",
       "role": "final pipeline receipt artifact writer",
       "consumed_by": ["master_controller"]
     },
     {
       "component_name": "intake_validator",
-      "file_path": "/anpd/v25/pipeline/intake_validator.py",
+      "file_path": "/anpd/v26/pipeline/intake_validator.py",
       "entry_function": "validate_intake",
       "role": "validates intake.json against V25 intake schema",
       "consumed_by": ["master_controller"]
     },
     {
       "component_name": "outline_parser",
-      "file_path": "/anpd/v25/pipeline/outline_parser.py",
+      "file_path": "/anpd/v26/pipeline/outline_parser.py",
       "entry_function": "parse_outline",
       "role": "parses operator outline (PDF/MD/DOCX) into OutlineStructure",
       "consumed_by": ["master_controller", "outline_comparator"]
     },
     {
       "component_name": "principles_loader",
-      "file_path": "/anpd/v25/pipeline/principles_loader.py",
+      "file_path": "/anpd/v26/pipeline/principles_loader.py",
       "entry_function": "load_principles",
       "role": "loads craft_principles.json for prompt injection",
       "consumed_by": ["synopsis_generator", "scene_writer", "scene_auditor"]
     },
     {
       "component_name": "synopsis_parser",
-      "file_path": "/anpd/v25/pipeline/synopsis_parser.py",
+      "file_path": "/anpd/v26/pipeline/synopsis_parser.py",
       "entry_function": "parse_synopsis",
       "role": "parses generated synopsis into structured form",
       "consumed_by": ["scene_writer", "scene_auditor"]
     },
     {
       "component_name": "character_profile_merge",
-      "file_path": "/anpd/v25/pipeline/character_profile_merge.py",
+      "file_path": "/anpd/v26/pipeline/character_profile_merge.py",
       "entry_function": "merge_character_profiles",
       "role": "merges series-level and book-specific character profiles into single cast dict",
       "consumed_by": ["character_profile_auditor", "character_generator"]
     },
     {
       "component_name": "library_loader",
-      "file_path": "/anpd/v25/pipeline/library_loader.py",
+      "file_path": "/anpd/v26/pipeline/library_loader.py",
       "entry_function": "",
       "role": "library access module (class LibraryLoader); instantiated by synopsis_generator for twist/action/voice library context",
       "consumed_by": ["synopsis_generator"]
     },
     {
       "component_name": "phase_handlers",
-      "file_path": "/anpd/v25/pipeline/phase_handlers.py",
+      "file_path": "/anpd/v26/pipeline/phase_handlers.py",
       "entry_function": "",
       "role": "per-phase pipeline handlers: handle_preflight, handle_synopsis_gate, handle_character_gate, handle_scene_loop, handle_chapter_assembly, handle_manuscript_gate, handle_format, handle_capsule_write",
       "consumed_by": ["master_controller"]
     },
     {
       "component_name": "audit_existing_manuscript",
-      "file_path": "/anpd/v25/pipeline/audit_existing_manuscript.py",
+      "file_path": "/anpd/v26/pipeline/audit_existing_manuscript.py",
       "entry_function": "run_audit",
       "role": "standalone auditor for existing manuscripts (uses synopsis_parser, scene_auditor, principles_loader)",
       "consumed_by": ["operator"]
     },
     {
       "component_name": "runtime_verifier",
-      "file_path": "/anpd/v25/pipeline/runtime_verifier.py",
+      "file_path": "/anpd/v26/pipeline/runtime_verifier.py",
       "entry_function": "",
       "role": "during-run and post-run verification engine (class RuntimeVerifier); R-rules and C-rules per Verification Rules §6-§7",
       "consumed_by": ["master_controller"]
     },
     {
       "component_name": "manifest_auditor",
-      "file_path": "/anpd/v25/pipeline/manifest_auditor.py",
+      "file_path": "/anpd/v26/pipeline/manifest_auditor.py",
       "entry_function": "run_manifest_audit",
       "role": "preflight gate: validates manifest integrity, component imports, entry functions, dependency graph, and detects commented-out or missing required components",
       "consumed_by": ["master_controller"]
     },
     {
       "component_name": "master_controller",
-      "file_path": "/anpd/v25/pipeline/master_controller.py",
+      "file_path": "/anpd/v26/pipeline/master_controller.py",
       "entry_function": "run_pipeline",
       "role": "top-level pipeline orchestrator; manifest-driven phase dispatch with manifest_auditor preflight gate and RuntimeVerifier integration",
       "consumed_by": ["operator"]

@@ -29,7 +29,7 @@ def resolve_config(series_config_path):
         series_config = json.load(f)
 
     genre = series_config["genre"]
-    genre_template_path = f"/anpd/v25/docs/genre_defaults/{genre}.json"
+    genre_template_path = f"/anpd/v26/docs/genre_defaults/{genre}.json"
     with open(genre_template_path, 'r', encoding='utf-8') as f:
         genre_template = json.load(f)
 

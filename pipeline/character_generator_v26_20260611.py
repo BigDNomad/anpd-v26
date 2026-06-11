@@ -19,7 +19,7 @@ not generate or modify protagonist, recurring, or any other series-level
 character profile.
 
 Per Book Config Schema v0.1: input artifact is `book_config.json`, authored
-by Dave per book at `/anpd/v25/series/{series}/{bNN}/work/book_config.json`.
+by Dave per book at `/anpd/v26/series/{series}/{bNN}/work/book_config.json`.
 
 Anti-pattern-matching discipline (per Character Profile Schema §4):
   Prompts contain NO populated character examples. The generator is

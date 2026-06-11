@@ -8,7 +8,7 @@
 ANPD V25 Manuscript Auditor — Check-Module Architecture
 
 Extends V24's 4-pass auditor with a modular check system. Check modules
-live in /anpd/v25/pipeline/audit_checks/ and are auto-discovered at runtime.
+live in /anpd/v26/pipeline/audit_checks/ and are auto-discovered at runtime.
 
 INPUT FORMATS:
   - Scene-per-file:  /path/to/manuscript/sc_NNN.md  (V25 Mandate format)

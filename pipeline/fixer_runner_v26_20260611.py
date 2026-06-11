@@ -341,7 +341,7 @@ def main():
         description="Run audit → fix → re-audit convergence loop.",
     )
     parser.add_argument("--book-dir", required=True,
-                        help="Path to book directory (e.g. /anpd/v25/series/airmen/b01)")
+                        help="Path to book directory (e.g. /anpd/v26/series/airmen/b01)")
     parser.add_argument("--manuscript", required=True,
                         help="Path to assembled manuscript (e.g. act1_full.md)")
     parser.add_argument("--max-iterations", type=int, default=MAX_ITERATIONS,

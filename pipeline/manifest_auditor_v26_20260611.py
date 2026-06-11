@@ -23,7 +23,7 @@ import tokenize
 from datetime import datetime, timezone
 from pathlib import Path
 
-PIPELINE_DIR = "/anpd/v25/pipeline"
+PIPELINE_DIR = "/anpd/v26/pipeline"
 
 HARDCODED_CRITICAL_COMPONENTS = [
     "synopsis_generator",
@@ -549,9 +549,9 @@ def _c013_unconsumed_outputs(manifest: dict) -> list:
 # ---------------------------------------------------------------------------
 
 def run_manifest_audit(
-    manifest_path: str = "/anpd/v25/pipeline/pipeline_manifest.json",
-    master_controller_path: str = "/anpd/v25/pipeline/master_controller.py",
-    report_dir: str = "/anpd/v25/out/manifest_audits",
+    manifest_path: str = "/anpd/v26/pipeline/pipeline_manifest.json",
+    master_controller_path: str = "/anpd/v26/pipeline/master_controller.py",
+    report_dir: str = "/anpd/v26/out/manifest_audits",
 ) -> dict:
     """Run all manifest audit checks. Returns a findings dict.
 
@@ -726,17 +726,17 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--manifest",
-        default="/anpd/v25/pipeline/pipeline_manifest.json",
+        default="/anpd/v26/pipeline/pipeline_manifest.json",
         help="Path to pipeline_manifest.json",
     )
     parser.add_argument(
         "--master-controller",
-        default="/anpd/v25/pipeline/master_controller.py",
+        default="/anpd/v26/pipeline/master_controller.py",
         help="Path to master_controller.py",
     )
     parser.add_argument(
         "--report-dir",
-        default="/anpd/v25/out/manifest_audits",
+        default="/anpd/v26/out/manifest_audits",
         help="Directory for audit report output",
     )
 

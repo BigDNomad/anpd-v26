@@ -6,7 +6,7 @@ that the master controller (Phase 4) routes through the auto-fix tiers.
 
 Built fresh in V24 with V20 `story_seed/auditors/character_auditor.py` as
 reference per White Paper §2.8. Reference audit at
-/anpd/v25/docs/character_auditor_v20_reference_audit_20260427_2330.md
+/anpd/v26/docs/character_auditor_v20_reference_audit_20260427_2330.md
 classifies V20 logic as INHERIT / EXTEND / RELOCATE / EXCLUDE.
 
 Architecture per White Paper §2.12:
@@ -78,7 +78,7 @@ GATE = "character_profile"
 # update in lockstep. Comments below cite the relevant §-numbers.
 
 # §12.5 — global banned names. Series-specific bans live in banned_phrases.json
-# at /anpd/v25/series/{series}/banned_phrases.json under the 'names' key.
+# at /anpd/v26/series/{series}/banned_phrases.json under the 'names' key.
 BANNED_NAMES_GLOBAL: frozenset = frozenset({
     "Sarah",
     "Chen",

@@ -81,7 +81,7 @@ RESUMABLE_PHASES = [
 
 # ─── COMPONENTS registry (per design doc §3) ──────────────────────────────────
 
-PIPELINE_DIR = "/anpd/v25/pipeline"
+PIPELINE_DIR = "/anpd/v26/pipeline"
 
 COMPONENTS: dict[str, str] = {
     "preflight":                 os.path.join(PIPELINE_DIR, "preflight.py"),
@@ -105,7 +105,7 @@ COMPONENTS: dict[str, str] = {
 SUPPORTED_MODES = {"new_book"}
 
 # Manifest path (canonical).
-MANIFEST_PATH = "/anpd/v25/pipeline/pipeline_manifest.json"
+MANIFEST_PATH = "/anpd/v26/pipeline/pipeline_manifest.json"
 
 
 # ─── STOP_REPORT helpers (per design doc §6) ──────────────────────────────────
@@ -288,7 +288,7 @@ def _read_git_commit_hash() -> str:
             ["git", "rev-parse", "HEAD"],
             capture_output=True,
             text=True,
-            cwd="/anpd/v25",
+            cwd="/anpd/v26",
         )
         if result.returncode == 0:
             return result.stdout.strip()
@@ -396,7 +396,7 @@ def preflight_stub(args: argparse.Namespace, pipeline_state: dict) -> list[dict]
             ["git", "status", "--porcelain"],
             capture_output=True,
             text=True,
-            cwd="/anpd/v25",
+            cwd="/anpd/v26",
         )
         if result.returncode == 0 and result.stdout.strip():
             findings.append({

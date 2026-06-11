@@ -53,7 +53,7 @@ from typing import Any
 
 # ─── Constants ────────────────────────────────────────────────────────────────
 
-V24_ROOT = "/anpd/v25"
+V24_ROOT = "/anpd/v26"
 PIPELINE_DIR = os.path.join(V24_ROOT, "pipeline")
 SHARED_DIR = os.path.join(V24_ROOT, "shared")
 
@@ -116,7 +116,7 @@ def _suggested_fix_for(error_code: str) -> str:
     """One sentence per error_code, per P006 of the rules spec."""
     fixes = {
         # File existence
-        "MISSING_SERIES_BIBLE":              "create or restore /anpd/v25/series/{series}/series_bible.json",
+        "MISSING_SERIES_BIBLE":              "create or restore /anpd/v26/series/{series}/series_bible.json",
         "MISSING_SERIES_CONFIG":             "create series_config.json from genre template + structural overrides",
         "MISSING_SERIES_CHARACTER_PROFILES": "create series-level character_profiles.json with permanent cast",
         "MISSING_NAME_REGISTRY":             "create name_registry.json with at minimum an empty array",
@@ -127,20 +127,20 @@ def _suggested_fix_for(error_code: str) -> str:
         "MISSING_BOOK_CONFIG":               "author book_config.json per Book Config Schema v0.1",
         "MISSING_BOOK_CHARACTER_PROFILES":   "run character_generator.py to produce book character_profiles.json",
         "MISSING_SEED_STATE":                "create state_after_sc00.json (seed state) before first run",
-        "MISSING_DLC_DIRECTORY":             "create /anpd/v25/shared/dlc/ directory",
+        "MISSING_DLC_DIRECTORY":             "create /anpd/v26/shared/dlc/ directory",
         "MISSING_OUTPUT_SCENES_DIR":         "create out/scenes/ directory in book root",
         "MISSING_OUTPUT_STATE_DIR":          "create out/state/ directory in book root",
         "MISSING_OUTPUT_REPORTS_DIR":        "create out/reports/ directory in book root",
         # Component-existence (downgraded to Class B per stub-handling list)
-        "MISSING_MASTER_CONTROLLER":         "ship master_controller.py to /anpd/v25/pipeline/",
-        "MISSING_SCENE_WRITER":              "ship scene_writer.py to /anpd/v25/pipeline/",
-        "MISSING_STATE_TRACKER":             "ship state_tracker.py to /anpd/v25/pipeline/",
-        "MISSING_SYNOPSIS_AUDITOR":          "ship synopsis_auditor.py to /anpd/v25/pipeline/",
-        "MISSING_SYNOPSIS_COMPARATOR":       "ship synopsis_comparator.py to /anpd/v25/pipeline/",
-        "MISSING_CHAPTER_EDITOR":            "ship chapter_editor.py to /anpd/v25/pipeline/",
-        "MISSING_FORMATTER":                 "ship formatter.py to /anpd/v25/pipeline/",
-        "MISSING_PSYCHOLOGY_PIPELINE":       "ship psychology_pipeline.py to /anpd/v25/pipeline/",
-        "MISSING_RESEARCH_PIPELINE":         "ship research_pipeline.py to /anpd/v25/pipeline/",
+        "MISSING_MASTER_CONTROLLER":         "ship master_controller.py to /anpd/v26/pipeline/",
+        "MISSING_SCENE_WRITER":              "ship scene_writer.py to /anpd/v26/pipeline/",
+        "MISSING_STATE_TRACKER":             "ship state_tracker.py to /anpd/v26/pipeline/",
+        "MISSING_SYNOPSIS_AUDITOR":          "ship synopsis_auditor.py to /anpd/v26/pipeline/",
+        "MISSING_SYNOPSIS_COMPARATOR":       "ship synopsis_comparator.py to /anpd/v26/pipeline/",
+        "MISSING_CHAPTER_EDITOR":            "ship chapter_editor.py to /anpd/v26/pipeline/",
+        "MISSING_FORMATTER":                 "ship formatter.py to /anpd/v26/pipeline/",
+        "MISSING_PSYCHOLOGY_PIPELINE":       "ship psychology_pipeline.py to /anpd/v26/pipeline/",
+        "MISSING_RESEARCH_PIPELINE":         "ship research_pipeline.py to /anpd/v26/pipeline/",
         # Validity
         "INTAKE_INVALID_JSON":               "fix JSON syntax error in intake.json",
         "SERIES_BIBLE_INVALID_JSON":         "fix JSON syntax error in series_bible.json",
@@ -182,7 +182,7 @@ def _suggested_fix_for(error_code: str) -> str:
         "JSON_IMPORT_FAILED":                "JSON is stdlib; check Python install",
         "GLOB_IMPORT_FAILED":                "glob is stdlib; check Python install",
         # Git
-        "GIT_REPO_NOT_INITIALIZED":          "run 'git init' at /anpd/v25/",
+        "GIT_REPO_NOT_INITIALIZED":          "run 'git init' at /anpd/v26/",
         "GIT_DIRTY_WORKING_TREE":            "commit or stash uncommitted changes",
         "GIT_NO_COMMITS":                    "make at least one commit before running pipeline",
     }

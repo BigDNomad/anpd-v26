@@ -122,7 +122,7 @@ class LibraryLoader:
     def __init__(
         self,
         intake_path: Path,
-        libraries_root: Path = Path("/anpd/v25/libraries"),
+        libraries_root: Path = Path("/anpd/v26/libraries"),
     ):
         self._libraries_root = Path(libraries_root)
         self._intake_path = Path(intake_path)

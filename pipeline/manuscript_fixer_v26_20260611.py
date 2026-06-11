@@ -798,7 +798,7 @@ class ManuscriptFixer:
 
         # Load shared resources
         synopsis_path = self.book_dir / "work" / "synopsis.md"
-        series_dir = self.book_dir.parent  # e.g., /anpd/v25/series/black_tide
+        series_dir = self.book_dir.parent  # e.g., /anpd/v26/series/black_tide
         series_bible_path = series_dir / "series_bible.json"
         char_profiles_path = series_dir / "character_profiles.json"
         craft_principles_path = Path(
