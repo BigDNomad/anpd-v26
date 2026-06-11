@@ -669,7 +669,7 @@ def main():
     )
     series_profiles_path = os.path.join(args.series_dir, 'character_profiles.json')
     book_profiles_path = os.path.join(book_dir, 'work', 'character_profiles.json')
-    findings_report_path = os.path.join(book_dir, 'character_generation_findings.json')
+    findings_report_path = os.path.join(book_dir, 'work', 'character_generation_findings.json')
 
     max_attempts = 1 + max(0, args.max_retries)
     all_attempts_findings = []  # list of {attempt, findings} for the report
