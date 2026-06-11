@@ -1,11 +1,12 @@
 """
 Tests for Q19 denouement scene counting logic.
 
-Four cases:
+Amended bands (2026-06-12):
 1. 0 DENOUEMENT → FAIL (deficit)
 2. 1 DENOUEMENT → FAIL (deficit)
-3. 2 DENOUEMENT → PASS (exact match)
-4. 3 DENOUEMENT → FAIL (excess)
+3. 2 DENOUEMENT → PASS (ideal)
+4. 3 DENOUEMENT → WEAK (advisory)
+5. 4 DENOUEMENT → FAIL (excess)
 """
 
 from __future__ import annotations
@@ -73,6 +74,16 @@ class TestCountDenouementScenes:
         count, table = _count_denouement_scenes(item)
         assert count == 3
 
+    def test_four_denouement(self):
+        item = _make_q19_item([
+            _make_scene(97, "DENOUEMENT"),
+            _make_scene(98, "DENOUEMENT"),
+            _make_scene(99, "DENOUEMENT"),
+            _make_scene(100, "DENOUEMENT"),
+        ])
+        count, table = _count_denouement_scenes(item)
+        assert count == 4
+
 
 def _effective_config():
     return {
@@ -108,8 +119,22 @@ class TestQ19ConsolidateVerdict:
         assert q19["verdict"] == "PASS"
         assert "Q19" not in output_json["fails"]
 
-    def test_three_denouement_fails_gate(self):
+    def test_three_denouement_weak_advisory(self):
+        """3 DENOUEMENT → WEAK (advisory, not a gate-blocker)."""
         call_1, call_2 = _make_calls_with_q19([
+            _make_scene(98, "DENOUEMENT"),
+            _make_scene(99, "DENOUEMENT"),
+            _make_scene(100, "DENOUEMENT"),
+        ])
+        output_json, _, verdict = consolidate(call_1, call_2, "Test", 20000, _effective_config())
+        q19 = [i for i in output_json["items"] if i["id"] == "Q19"][0]
+        assert q19["verdict"] == "WEAK"
+        assert "Q19" not in output_json["fails"]
+
+    def test_four_denouement_fails_gate(self):
+        """4+ DENOUEMENT → FAIL (excess)."""
+        call_1, call_2 = _make_calls_with_q19([
+            _make_scene(97, "DENOUEMENT"),
             _make_scene(98, "DENOUEMENT"),
             _make_scene(99, "DENOUEMENT"),
             _make_scene(100, "DENOUEMENT"),
@@ -123,6 +148,18 @@ class TestQ19ConsolidateVerdict:
         call_1, call_2 = _make_calls_with_q19([
             _make_scene(97, "AFTERMATH"),
             _make_scene(98, "AFTERMATH"),
+        ])
+        output_json, _, verdict = consolidate(call_1, call_2, "Test", 20000, _effective_config())
+        q19 = [i for i in output_json["items"] if i["id"] == "Q19"][0]
+        assert q19["verdict"] == "FAIL"
+        assert "deficit" in q19["note"]
+
+    def test_one_denouement_fails_gate(self):
+        """1 DENOUEMENT → FAIL (deficit)."""
+        call_1, call_2 = _make_calls_with_q19([
+            _make_scene(97, "AFTERMATH"),
+            _make_scene(98, "AFTERMATH"),
+            _make_scene(99, "DENOUEMENT"),
         ])
         output_json, _, verdict = consolidate(call_1, call_2, "Test", 20000, _effective_config())
         q19 = [i for i in output_json["items"] if i["id"] == "Q19"][0]
