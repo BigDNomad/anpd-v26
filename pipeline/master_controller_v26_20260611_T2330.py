@@ -88,8 +88,8 @@ PIPELINE_DIR = "/anpd/v26/pipeline"
 # identifiers.
 COMPONENTS: dict[str, str] = {
     "preflight":                 "pipeline.preflight_v26_20260611",
-    "synopsis_generator":        "pipeline.synopsis_generator_v26_20260611",
-    "synopsis_auditor":          "pipeline.synopsis_auditor_v26_20260611_T0530",
+    "synopsis_generator":        "pipeline.synopsis_generator_v26_20260611_T0600",
+    "synopsis_auditor":          "pipeline.synopsis_auditor_v26_20260611_T0600",
     "synopsis_summarizer":       "pipeline.synopsis_summarizer_v26_20260611",
     "character_generator":       "pipeline.character_generator_v26_20260611",
     "character_profile_auditor": "pipeline.character_profile_auditor_v26_20260611",
