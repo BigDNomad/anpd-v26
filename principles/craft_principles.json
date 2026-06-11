@@ -1,0 +1,264 @@
+{
+  "version": "1.0.0",
+  "scope": "V25 Phase 1 \u2014 synopsis-relevant principles only",
+  "principles": [
+    {
+      "id": "TIME-REFS-AVOID",
+      "name": "Avoid Relative Time References",
+      "scope": "GENERIC",
+      "category": "PROSE",
+      "severity": "CLASS_B",
+      "description": "Strip relative time references ('three hours later', 'the next morning', 'two weeks ago'). Preserve only structurally-locked date anchors (Dec 2018 in prologue, Feb 24 invasion start). Time passes through scene transitions, not through narrated time references.",
+      "applies_to": [
+        "synopsis",
+        "manuscript"
+      ],
+      "components_inject_into_prompt": [
+        "synopsis_generator",
+        "scene_writer"
+      ],
+      "exceptions": [
+        "Structurally-locked historical dates that anchor the timeline"
+      ],
+      "check_method": "grep",
+      "check_pattern": "\\b(hours? later|days? later|weeks? later|next morning|that evening|the following|ago)\\b"
+    },
+    {
+      "id": "OPENING-SENSE-VARIETY",
+      "name": "Vary Scene-Opening Sensory Establishment",
+      "scope": "GENERIC",
+      "category": "PROSE",
+      "severity": "CLASS_B",
+      "description": "Do not open scenes with smell-of-room descriptions unless the smell carries plot weight (chemical leak, fire, decomposition indicating threat). Vary opening sensory channels: visual, auditory, kinesthetic, spatial. No two consecutive scenes should open with the same sensory channel.",
+      "applies_to": [
+        "synopsis",
+        "manuscript"
+      ],
+      "components_inject_into_prompt": [
+        "synopsis_generator",
+        "scene_writer"
+      ],
+      "exceptions": [
+        "Smell that carries direct plot information (gas leak, fire, decomposition)"
+      ],
+      "check_method": "grep",
+      "check_pattern": "\\b(smell(s|ed)?\\sof|the\\sroom\\ssmell|odor\\sof|stench\\sof)\\b"
+    },
+    {
+      "id": "OPERATOR-STRUCTURE-FIDELITY",
+      "name": "Operator Structure Fidelity",
+      "scope": "GENERIC",
+      "category": "STRUCTURE",
+      "severity": "CLASS_A",
+      "description": "Generated synopsis MUST match operator outline chapter-by-chapter. No chapters added, removed, or reordered. Every outline beat must appear in the corresponding synopsis chapter. No beats invented that are not in the outline.",
+      "applies_to": [
+        "synopsis"
+      ],
+      "components_inject_into_prompt": [
+        "synopsis_generator"
+      ],
+      "exceptions": [],
+      "check_method": "comparator",
+      "check_pattern": "outline_comparator.compare_outline_to_synopsis"
+    },
+    {
+      "id": "TIMELINE-SCOPE-SELECTION",
+      "name": "Timeline Scope Selection",
+      "scope": "WAR-FICTION",
+      "category": "STRUCTURE",
+      "severity": "CLASS_A",
+      "description": "Synopsis must not generate scenes outside the operator-specified historical window. Events referenced must fall within the start_date and end_date in intake.json. Out-of-scope historical anchors listed in intake must not appear.",
+      "applies_to": [
+        "synopsis",
+        "manuscript"
+      ],
+      "components_inject_into_prompt": [
+        "synopsis_generator",
+        "scene_writer"
+      ],
+      "exceptions": [
+        "Prologue/epilogue if explicitly specified in outline"
+      ],
+      "check_method": "comparator",
+      "check_pattern": "historical_anchors_out_of_scope check"
+    },
+    {
+      "id": "ANTAGONIST-POWER-CURVE",
+      "name": "Antagonist Power Curve",
+      "scope": "WAR-FICTION",
+      "category": "STRUCTURE",
+      "severity": "CLASS_B",
+      "description": "Antagonist capability follows a defined power curve across the book: OVERWHELMING in early chapters, transitioning through EQUAL, SEEMING DEFEATABLE, STAKES RAISE, and HARD WON. The operator specifies phase transitions per chapter in the outline annotations.",
+      "applies_to": [
+        "synopsis"
+      ],
+      "components_inject_into_prompt": [
+        "synopsis_generator"
+      ],
+      "exceptions": [],
+      "check_method": "manual",
+      "check_pattern": "Review antagonist phase tags per chapter"
+    },
+    {
+      "id": "VICTORY-BALANCE",
+      "name": "Victory Balance",
+      "scope": "WAR-FICTION",
+      "category": "STRUCTURE",
+      "severity": "CLASS_B",
+      "description": "Show enemy victories AND friendly victories. Both sides win some and lose some. The protagonist's unit fights bravely AND loses tactically at times. Antagonist is overwhelming overall in early chapters despite tactical setbacks.",
+      "applies_to": [
+        "synopsis",
+        "manuscript"
+      ],
+      "components_inject_into_prompt": [
+        "synopsis_generator"
+      ],
+      "exceptions": [],
+      "check_method": "manual",
+      "check_pattern": "Review win/loss balance across chapters"
+    },
+    {
+      "id": "MOVEMENT-AS-STRATEGY",
+      "name": "Movement as Strategy",
+      "scope": "WAR-FICTION",
+      "category": "DOCTRINE",
+      "severity": "CLASS_B",
+      "description": "No fixed base. The unit is mobile. Camp = tonight's location, not a recurring headquarters. Every camp is temporary. Discussions happen on horseback, in vehicles, at campfires \u2014 not in rooms with furniture.",
+      "applies_to": [
+        "synopsis",
+        "manuscript"
+      ],
+      "components_inject_into_prompt": [
+        "synopsis_generator",
+        "scene_writer"
+      ],
+      "exceptions": [
+        "Scenes explicitly set at a fixed location in the outline (hospital, recruitment point)"
+      ],
+      "check_method": "grep",
+      "check_pattern": "\\b(headquarters|base of operations|returned to (the|their) base|back at (the|their) base)\\b"
+    },
+    {
+      "id": "NO-PRISONERS-DOCTRINE",
+      "name": "No Prisoners Doctrine",
+      "scope": "WAR-FICTION",
+      "category": "DOCTRINE",
+      "severity": "CLASS_A",
+      "description": "Broken Sabers never take prisoners. No quarter, no witnesses. Captured enemy combatants are not held. This is a unit doctrine established early in the book and followed throughout. The moral weight of this doctrine is part of the story.",
+      "applies_to": [
+        "synopsis",
+        "manuscript"
+      ],
+      "components_inject_into_prompt": [
+        "synopsis_generator",
+        "scene_writer"
+      ],
+      "exceptions": [
+        "Scenes where the outline explicitly specifies prisoner capture"
+      ],
+      "check_method": "manual",
+      "check_pattern": "Review prisoner-handling scenes against doctrine"
+    },
+    {
+      "id": "BALACLAVA-OPERATIONS",
+      "name": "Balaclava Operations",
+      "scope": "WAR-FICTION",
+      "category": "DOCTRINE",
+      "severity": "CLASS_B",
+      "description": "Masks (balaclavas) worn during all raids, attacks, and ambushes. Identity concealment is standard operational procedure for the unit.",
+      "applies_to": [
+        "synopsis",
+        "manuscript"
+      ],
+      "components_inject_into_prompt": [
+        "synopsis_generator",
+        "scene_writer"
+      ],
+      "exceptions": [],
+      "check_method": "manual",
+      "check_pattern": "Review operational scenes for mask references"
+    },
+    {
+      "id": "VOICE-REGISTER",
+      "name": "Voice Register",
+      "scope": "GENERIC",
+      "category": "VOICE",
+      "severity": "CLASS_B",
+      "description": "Leonard base voice (short declarative sentences, ground-level observation, no authorial intrusion) with McCarthy intrusions (extended sentences, philosophical weight) allocated by scene type. ACTION scenes: 0-5% McCarthy. NON-ACTION scenes: 10-20% McCarthy. Synopsis prose should reflect this register to cue scene_writer downstream.",
+      "applies_to": [
+        "synopsis",
+        "manuscript"
+      ],
+      "components_inject_into_prompt": [
+        "synopsis_generator",
+        "scene_writer"
+      ],
+      "exceptions": [],
+      "check_method": "manual",
+      "check_pattern": "Review sentence length distribution per scene type"
+    },
+    {
+      "id": "NO-AGE-REFS-TEAM",
+      "name": "No Age References for Team Members",
+      "scope": "WAR-FICTION",
+      "category": "PROSE",
+      "severity": "CLASS_B",
+      "description": "Do not state the ages of Broken Sabers team members in narrative prose. Age is established once in character introduction and never restated. The youth of the team is shown through behavior and competence gap, not through numerical age references.",
+      "applies_to": [
+        "synopsis",
+        "manuscript"
+      ],
+      "components_inject_into_prompt": [
+        "synopsis_generator",
+        "scene_writer"
+      ],
+      "exceptions": [
+        "Initial character introduction scene",
+        "Dialogue where age is plot-relevant"
+      ],
+      "check_method": "grep",
+      "check_pattern": "\\b(sixteen|seventeen|eighteen|nineteen|twenty|year.old|years? old)\\b"
+    },
+    {
+      "id": "NO-REINTRODUCTION",
+      "name": "Do Not Reintroduce Already-Established Material",
+      "scope": "GENERIC",
+      "category": "STRUCTURE",
+      "severity": "CLASS_A",
+      "description": "Each scene after the first in a chapter must build forward from prior scenes, not recapitulate. The reader has read prior scenes \u2014 restating their content is filler. Callbacks are permitted only when they carry meaning at a structural moment; mere re-anchoring with established imagery is forbidden.",
+      "applies_to": [
+        "scene_writer"
+      ],
+      "components_inject_into_prompt": [
+        "scene_writer"
+      ],
+      "exceptions": [
+        "First scene of a chapter has nothing prior to recapitulate",
+        "Deliberate structural callbacks at chapter climax beats"
+      ],
+      "check_method": "llm_semantic",
+      "check_pattern": null
+    },
+    {
+      "id": "REFLEXIVE-TAUTOLOGY",
+      "name": "Reflexive Tautology \u2014 Use Sparingly at Work Level",
+      "scope": "GENERIC",
+      "category": "STYLE",
+      "severity": "CLASS_A",
+      "description": "Constructions of the form \"X doing what X does\", \"the way X always did/does\", \"which was what X was\". McCarthy uses this at ~1 per 15,000-20,000 words. Above that rate it becomes a verbal stamp. Check is GLOBAL across the manuscript.",
+      "applies_to": [
+        "scene_writer"
+      ],
+      "components_inject_into_prompt": [
+        "scene_writer"
+      ],
+      "exceptions": [
+        "Thematically load-bearing moments where the recursion IS the point"
+      ],
+      "check_method": "deterministic_regex_plus_llm",
+      "check_pattern": "REFLEXIVE_TAUTOLOGY_PATTERNS in scene_auditor",
+      "budget_per_words": 6.7e-05,
+      "budget_notes": "1 instance per 15,000 words. Act 1 (~27,500 words): budget = 1-2. Full book (~85,000 words): budget = 4-5."
+    }
+  ]
+}
