@@ -4,6 +4,7 @@
   "series": "Airmen",
   "total_chapter_count": 25,
   "total_scene_count": 100,
+  "target_scene_count": 100,
   "target_word_count": 90000,
   "outline_path": "outline.md",
   "historical_window": {
