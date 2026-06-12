@@ -103,6 +103,44 @@ class TestPreRunClean:
         s_rules = {rid for rid in rule_ids if rid.startswith("S")}
         assert s_rules == set(), f"S-rules should not run at pre_run: {s_rules}"
 
+    def test_pre_run_passes_with_outline_present(self, tmp_path):
+        """F026: clean fixture with outline_path pointing to existing file passes."""
+        from preflight_v26_20260611 import run_preflight
+
+        book_dir, series_dir = _make_clean_fixture(tmp_path)
+        # Add outline_path to intake and create the file
+        intake_path = os.path.join(book_dir, "work", "intake.json")
+        with open(intake_path) as f:
+            intake = json.load(f)
+        intake["outline_path"] = "outline.md"
+        with open(intake_path, "w") as f:
+            json.dump(intake, f)
+        with open(os.path.join(book_dir, "work", "outline.md"), "w") as f:
+            f.write("# Chapter 1\n")
+
+        _, results = run_preflight(book_dir, series_dir, stage="pre_run")
+        f026 = [r for r in results if r.rule_id == "F026"]
+        assert len(f026) >= 1
+        assert all(r.passed for r in f026), "F026 should pass when outline exists"
+
+    def test_pre_run_fails_with_missing_outline(self, tmp_path):
+        """F026: intake with outline_path but no outline.md file → FAIL."""
+        from preflight_v26_20260611 import run_preflight
+
+        book_dir, series_dir = _make_clean_fixture(tmp_path)
+        intake_path = os.path.join(book_dir, "work", "intake.json")
+        with open(intake_path) as f:
+            intake = json.load(f)
+        intake["outline_path"] = "outline.md"
+        with open(intake_path, "w") as f:
+            json.dump(intake, f)
+        # Deliberately do NOT create outline.md
+
+        _, results = run_preflight(book_dir, series_dir, stage="pre_run")
+        f026_fails = [r for r in results if r.rule_id == "F026" and not r.passed]
+        assert len(f026_fails) >= 1
+        assert f026_fails[0].error_code == "MISSING_INTAKE_REFERENCED_INPUT"
+
     def test_pre_run_skips_synopsis_file_check(self, tmp_path):
         from preflight_v26_20260611 import run_preflight
 

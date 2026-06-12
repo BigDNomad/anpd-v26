@@ -95,7 +95,7 @@ VALID_STAGES = {"pre_run", "post_synopsis"}
 # Rules active at each stage. post_synopsis includes everything.
 PRE_RUN_F_RULES = {"F001", "F002", "F003", "F005", "F007",
                    "F013", "F014", "F015", "F016", "F017", "F018",
-                   "F019", "F020", "F021", "F022"}
+                   "F019", "F020", "F021", "F022", "F026"}
 PRE_RUN_V_RULES = {"V001", "V002", "V007"}
 
 VALID_SCENE_COUNTS = {75, 100, 125}
@@ -172,6 +172,7 @@ def _suggested_fix_for(error_code: str) -> str:
         "MISSING_OUTPUT_SCENES_DIR":         "create out/scenes/ directory in book root",
         "MISSING_OUTPUT_STATE_DIR":          "create out/state/ directory in book root",
         "MISSING_OUTPUT_REPORTS_DIR":        "create out/reports/ directory in book root",
+        "MISSING_INTAKE_REFERENCED_INPUT":  "ensure the file referenced by this intake path field exists in work/",
         # Component-existence (downgraded to Class B per stub-handling list)
         "MISSING_MASTER_CONTROLLER":         "ship master_controller.py to /anpd/v26/pipeline/",
         "MISSING_SCENE_WRITER":              "ship scene_writer.py to /anpd/v26/pipeline/",
@@ -362,6 +363,34 @@ def run_file_existence_rules(
         results.append(_check_dir_exists(
             rule_id, os.path.join(book_dir, rel), err,
         ))
+
+    # F026: every path-valued field in intake must point to an existing file
+    if active is None or "F026" in active:
+        intake_path = os.path.join(book_dir, "work", "intake.json")
+        intake = _safe_load_json(intake_path)
+        if isinstance(intake, dict):
+            work_dir = os.path.join(book_dir, "work")
+            missing_fields: list[str] = []
+            for key, value in intake.items():
+                if not (key.endswith("_path") and isinstance(value, str)):
+                    continue
+                if value.startswith("/"):
+                    resolved = value
+                else:
+                    resolved = os.path.join(work_dir, value)
+                if not os.path.exists(resolved):
+                    missing_fields.append(key)
+            if missing_fields:
+                for field in missing_fields:
+                    results.append(RuleResult(
+                        "F026", False, "MISSING_INTAKE_REFERENCED_INPUT",
+                        f"intake.{field} references a file that does not exist",
+                        severity="A",
+                    ))
+            else:
+                results.append(RuleResult("F026", True))
+        else:
+            results.append(RuleResult("F026", True))  # vacuous; V001 catches
 
     return results
 
@@ -845,7 +874,12 @@ def run_config_path_integrity_rules(
         data = _safe_load_json(config_path)
         if not isinstance(data, dict):
             continue
-        _check_path_fields(data, config_label, bad_fields)
+        # For intake, resolve relative paths against work/ dir
+        resolve_base = (
+            os.path.dirname(config_path) if config_label == "intake" else None
+        )
+        _check_path_fields(data, config_label, bad_fields,
+                           resolve_base=resolve_base)
 
     if bad_fields:
         field_list = "; ".join(bad_fields[:10])
@@ -861,9 +895,16 @@ def run_config_path_integrity_rules(
 
 
 def _check_path_fields(
-    data: dict, prefix: str, bad_fields: list[str]
+    data: dict, prefix: str, bad_fields: list[str],
+    resolve_base: str | None = None,
 ) -> None:
-    """Recursively check dict for string values that look like absolute paths."""
+    """Recursively check dict for string values that are paths.
+
+    Absolute paths: must be under V24_ROOT and must exist.
+    Relative path-valued fields (key ends with ``_path``): resolved against
+    *resolve_base* (when provided) and must exist.  Root-containment is
+    not applied to relative paths.
+    """
     for key, value in data.items():
         if isinstance(value, str) and value.startswith("/"):
             # It's an absolute path — must be under V24_ROOT
@@ -871,8 +912,20 @@ def _check_path_fields(
                 bad_fields.append(f"{prefix}.{key}={value}")
             elif not os.path.exists(value):
                 bad_fields.append(f"{prefix}.{key}={value} (does not exist)")
+        elif (
+            isinstance(value, str)
+            and key.endswith("_path")
+            and not value.startswith("/")
+            and resolve_base is not None
+        ):
+            resolved = os.path.join(resolve_base, value)
+            if not os.path.exists(resolved):
+                bad_fields.append(
+                    f"{prefix}.{key}={value} (does not exist, resolved to {resolved})"
+                )
         elif isinstance(value, dict):
-            _check_path_fields(value, f"{prefix}.{key}", bad_fields)
+            _check_path_fields(value, f"{prefix}.{key}", bad_fields,
+                               resolve_base=resolve_base)
 
 
 # ─── Output handlers ──────────────────────────────────────────────────────────
