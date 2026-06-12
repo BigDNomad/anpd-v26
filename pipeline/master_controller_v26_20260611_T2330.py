@@ -1132,4 +1132,12 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
+    if __package__ is None:
+        print(
+            "ERROR: master_controller must be invoked as a module, not a script.\n"
+            "  Use:  python3 -m pipeline.master_controller [args]\n"
+            "  Not:  python3 pipeline/master_controller_v26_20260611_T2330.py [args]",
+            file=sys.stderr,
+        )
+        sys.exit(1)
     sys.exit(main())
