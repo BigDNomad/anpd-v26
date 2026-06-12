@@ -1,0 +1,156 @@
+{
+  "ledger_meta": {
+    "schema_version": "1.0.0",
+    "series_slug": "airmen",
+    "source_synopsis_path": "series/airmen/b01/work/synopsis.md",
+    "builder_version": "manual-seed-20260612",
+    "sealed": true,
+    "built_at": "2026-06-12T11:00:00+00:00",
+    "notes": "Hand-seeded from synopsis scalar invariants per F-INT-9 Part 2. Excludes time-varying tallies (Bounchanh aircraft count)."
+  },
+  "entities": [
+    {
+      "id": "kl7_cipher_machine",
+      "canonical_name": "KL-7 cipher machine",
+      "aliases": ["KL-7 chassis", "cipher machine", "the machine"],
+      "entity_class": "scalar",
+      "invariants": {
+        "designation": "KL-7"
+      }
+    },
+    {
+      "id": "kl7_cipher_rotors",
+      "canonical_name": "KL-7 cipher rotors",
+      "aliases": ["cipher rotors", "rotors"],
+      "entity_class": "scalar",
+      "invariants": {
+        "count": 8,
+        "designation": "KL-7"
+      }
+    },
+    {
+      "id": "m134_miniguns",
+      "canonical_name": "M134 miniguns",
+      "aliases": ["miniguns"],
+      "entity_class": "scalar",
+      "invariants": {
+        "count": 3
+      }
+    },
+    {
+      "id": "ac119k_gunship",
+      "canonical_name": "AC-119K gunship",
+      "aliases": ["Black Widow", "AC-119K", "the gunship"],
+      "entity_class": "scalar",
+      "invariants": {
+        "designation": "AC-119K"
+      }
+    },
+    {
+      "id": "coyle_burn_side",
+      "canonical_name": "Coyle burn damage",
+      "aliases": [],
+      "entity_class": "scalar",
+      "invariants": {
+        "side": "right"
+      }
+    },
+    {
+      "id": "coyle_broken_leg",
+      "canonical_name": "Coyle broken leg",
+      "aliases": [],
+      "entity_class": "scalar",
+      "invariants": {
+        "side": "left"
+      }
+    },
+    {
+      "id": "khamla",
+      "canonical_name": "Khamla",
+      "aliases": ["Private Khamla", "the private"],
+      "entity_class": "lifecycle_role",
+      "lifecycle": {
+        "alive_at_end_of_book": false,
+        "death_scene": 14,
+        "death_cause": "AC-119K fuel tank explosion while retrieving KL-7 chassis",
+        "source": "synopsis line 114"
+      }
+    },
+    {
+      "id": "briggs",
+      "canonical_name": "Briggs",
+      "aliases": [],
+      "entity_class": "lifecycle_role",
+      "lifecycle": {
+        "alive_at_end_of_book": false,
+        "death_scene": 8,
+        "death_cause": "SAM shrapnel at sensor station",
+        "source": "synopsis line 67 (crew killed/wounded) + prose sc08/sc10"
+      }
+    },
+    {
+      "id": "paulson",
+      "canonical_name": "Paulson",
+      "aliases": [],
+      "entity_class": "lifecycle_role",
+      "lifecycle": {
+        "alive_at_end_of_book": false,
+        "death_scene": 8,
+        "death_cause": "SAM shrapnel at gun mount",
+        "source": "synopsis line 67 (crew killed/wounded) + prose sc08/sc10"
+      }
+    }
+  ],
+  "provenance": {
+    "kl7_cipher_machine.designation": {
+      "origin": "synopsis",
+      "resolution": "unanimous",
+      "source_lines": [89, 107, 113, 128, 130]
+    },
+    "kl7_cipher_rotors.count": {
+      "origin": "synopsis",
+      "resolution": "unanimous",
+      "source_lines": [90]
+    },
+    "kl7_cipher_rotors.designation": {
+      "origin": "synopsis",
+      "resolution": "unanimous",
+      "source_lines": [89, 90]
+    },
+    "m134_miniguns.count": {
+      "origin": "synopsis",
+      "resolution": "unanimous",
+      "source_lines": [40, 48, 49]
+    },
+    "ac119k_gunship.designation": {
+      "origin": "synopsis",
+      "resolution": "unanimous",
+      "source_lines": [29, 47, 67, 77, 82, 106, 113, 114, 120]
+    },
+    "coyle_burn_side.side": {
+      "origin": "synopsis",
+      "resolution": "unanimous",
+      "source_lines": [82]
+    },
+    "coyle_broken_leg.side": {
+      "origin": "synopsis",
+      "resolution": "unanimous",
+      "source_lines": [82]
+    },
+    "khamla.lifecycle": {
+      "origin": "synopsis",
+      "resolution": "unanimous",
+      "source_lines": [114, 115]
+    },
+    "briggs.lifecycle": {
+      "origin": "synopsis+prose",
+      "resolution": "inferred",
+      "source_lines": [67, 82]
+    },
+    "paulson.lifecycle": {
+      "origin": "synopsis+prose",
+      "resolution": "inferred",
+      "source_lines": [67, 82]
+    }
+  }
+}

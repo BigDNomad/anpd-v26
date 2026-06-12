@@ -704,6 +704,10 @@ def handle_manuscript_gate(
         auditor_args += ["--series-bible", args.series_bible]
     if hasattr(args, "character_profiles") and args.character_profiles:
         auditor_args += ["--character-profiles", args.character_profiles]
+    # Schema 1.1.0: book-level character profiles (merged with series-level by MA-002)
+    book_cp_path = os.path.join(args.book_dir, "work", "character_profiles.json")
+    if os.path.isfile(book_cp_path):
+        auditor_args += ["--book-character-profiles", book_cp_path]
     audit_output_dir = os.path.join(args.book_dir, "out", "audit")
     auditor_args += ["--output-dir", audit_output_dir]
 

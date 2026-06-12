@@ -439,98 +439,6 @@ def _call_llm(system: str, user: str, model: str = HAIKU_MODEL) -> str:
         return ""
 
 
-# ── LLM extraction + 3-pass majority gate (F-INT-9 Part 2) ───────────────
-
-
-_FACT_EXTRACTION_SYSTEM = """You are a manuscript fact-checker. You will be given a scene from a novel and a specific entity to check. Extract ONLY the factual assertions the scene makes about that entity.
-
-For each assertion, output one JSON object per line:
-{"fact_type": "count"|"designation"|"side", "asserted_value": <string or number>, "excerpt": "exact quote <=100 chars"}
-
-Rules:
-- count: the numeric quantity explicitly stated for the entity (e.g., "eight rotors" → 8)
-- designation: the alphanumeric model/type string used for the entity (e.g., "KL-7", "AC-119K")
-- side: the body side referenced for the entity (e.g., "right", "left")
-
-If the entity is not mentioned or no checkable fact is asserted, output: NO_ASSERTIONS
-Output JSON lines or NO_ASSERTIONS only. Nothing else."""
-
-
-def _llm_extract_entity_facts(entity_name: str, entity_aliases: list[str],
-                               invariant_keys: list[str], scene_text: str) -> list[dict]:
-    """Single LLM pass: extract fact assertions for one entity from one scene."""
-    alias_str = ", ".join([entity_name] + entity_aliases) if entity_aliases else entity_name
-    key_str = ", ".join(invariant_keys)
-    user = (
-        f"Entity: \"{alias_str}\"\n"
-        f"Fact types to check: {key_str}\n\n"
-        f"Scene text:\n---\n{scene_text[:4000]}\n---\n\n"
-        f"Extract factual assertions about this entity."
-    )
-    response = _call_llm(_FACT_EXTRACTION_SYSTEM, user)
-    results = []
-    for line in response.strip().splitlines():
-        line = line.strip()
-        if line == "NO_ASSERTIONS" or not line.startswith("{"):
-            continue
-        try:
-            import json as _json
-            obj = _json.loads(line)
-            results.append(obj)
-        except Exception:
-            continue
-    return results
-
-
-def _majority_vote_extract(entity: dict, scene_text: str, n_passes: int = 3) -> list[dict]:
-    """Run n_passes LLM extractions and return facts with vote counts.
-
-    Returns list of {fact_type, asserted_value, excerpt, vote_count, total_passes}.
-    A fact must appear in >=2 of 3 passes with the same (fact_type, asserted_value)
-    to be considered consistent.
-    """
-    canonical_name = entity.get("canonical_name", "")
-    aliases = entity.get("aliases", [])
-    invariants = entity.get("invariants", {})
-    inv_keys = list(invariants.keys())
-
-    if not inv_keys:
-        return []
-
-    # Collect facts across passes
-    from collections import Counter
-    fact_votes: Counter = Counter()  # (fact_type, str(asserted_value)) -> count
-    fact_excerpts: dict[tuple, str] = {}
-
-    for _pass in range(n_passes):
-        facts = _llm_extract_entity_facts(canonical_name, aliases, inv_keys, scene_text)
-        for f in facts:
-            ft = f.get("fact_type", "")
-            av = f.get("asserted_value")
-            if ft and av is not None:
-                key = (ft, str(av))
-                fact_votes[key] += 1
-                if key not in fact_excerpts:
-                    fact_excerpts[key] = f.get("excerpt", "")
-
-    # Build results with vote counts
-    results = []
-    for (ft, av_str), count in fact_votes.items():
-        # Try to parse numeric values
-        try:
-            av = int(av_str)
-        except (ValueError, TypeError):
-            av = av_str
-        results.append({
-            "fact_type": ft,
-            "asserted_value": av,
-            "excerpt": fact_excerpts.get((ft, av_str), ""),
-            "vote_count": count,
-            "total_passes": n_passes,
-        })
-    return results
-
-
 def _llm_coda_death_check(entity_name: str, coda_text: str) -> bool:
     """Targeted LLM call scoped to the coda: is this character described as dead?"""
     if not coda_text.strip():
@@ -794,22 +702,15 @@ def _detect_transition_violations(
 # ── Check class ──────────────────────────────────────────────────────────
 
 
-# F-INT-9 Part 2: count/side/forbidden_state/role_violation upgraded from
-# CLASS_B to LLM-gated severity. 2/3 majority → CLASS_A; 1/3 → CLASS_B.
-# designation and death_assertion remain unconditionally CLASS_A.
 _SEVERITY_BY_FACT = {
     "designation":              "CLASS_A",
     "death_assertion":          "CLASS_A",
     "state_transition_violation":"CLASS_A",
-    "count":                    "CLASS_A",   # F-INT-9 Part 2: upgraded, LLM-gated
-    "side":                     "CLASS_A",   # F-INT-9 Part 2: upgraded, LLM-gated
-    "forbidden_state":          "CLASS_A",   # F-INT-9 Part 2: upgraded, LLM-gated
-    "role_violation":           "CLASS_A",   # F-INT-9 Part 2: upgraded, LLM-gated
+    "count":                    "CLASS_B",
+    "side":                     "CLASS_B",
+    "forbidden_state":          "CLASS_B",
+    "role_violation":           "CLASS_B",
 }
-
-# Fact types that require 3-pass LLM majority to emit CLASS_A.
-# Without majority (1/3), they emit CLASS_B advisory.
-_LLM_GATED_FACTS = {"count", "side", "forbidden_state", "role_violation"}
 
 
 class EntityConsistencyCheck:
@@ -831,7 +732,6 @@ class EntityConsistencyCheck:
         text = manuscript.full_text()
         lines = text.split("\n")
         self._scene_boundaries = _build_line_to_scene(manuscript)
-        self._manuscript_ref = manuscript  # for LLM-gated scene access
         findings: list[Finding] = []
 
         # Get coda text (last ~15% of manuscript) for lifecycle checks
@@ -852,19 +752,11 @@ class EntityConsistencyCheck:
         return findings
 
     def _handle_scalar(self, entity: dict, text: str, ledger: dict) -> list[Finding]:
-        """Scalar handler: deterministic designation/count/side comparison.
-
-        F-INT-9 Part 2: for LLM-gated fact types (count, side), regex findings
-        are confirmed via 3-pass LLM majority vote. 2/3 majority → CLASS_A;
-        1/3 or unconfirmed → CLASS_B advisory.
-        """
+        """Scalar handler: deterministic designation/count/side comparison."""
         facts = find_asserted_facts(entity, text)
         findings = []
         eid = entity["id"]
         invariants = entity.get("invariants", {})
-
-        # Track which scenes have regex-detected violations for LLM confirmation
-        scenes_needing_llm: dict[int, list[dict]] = {}  # scene_number -> [facts]
 
         for fact in facts:
             ft = fact["fact_type"]
@@ -893,104 +785,46 @@ class EntityConsistencyCheck:
                         line_number=fact["line_number"],
                     ))
 
-            elif ft in ("count", "side"):
-                is_mismatch = False
-                if ft == "count" and asserted != canonical:
-                    is_mismatch = True
-                elif ft == "side" and str(asserted).lower() != str(canonical).lower():
-                    is_mismatch = True
+            elif ft == "count":
+                if asserted != canonical:
+                    prov = _get_provenance(ledger, eid, "count")
+                    prov_str = _provenance_evidence(prov)
+                    findings.append(Finding(
+                        check_id=self.check_id,
+                        severity=_SEVERITY_BY_FACT["count"],
+                        scene_number=_resolve_scene_number(self._scene_boundaries, fact["line_number"]),
+                        description=(
+                            f"Count mismatch: {eid} — manuscript says {asserted}, "
+                            f"ledger says {canonical}. {prov_str}"
+                        ),
+                        evidence=[fact["context"]],
+                        suggested_fix=(
+                            f"Tier 1: correct count from {asserted} to {canonical} at line {fact['line_number']}."
+                        ),
+                        line_number=fact["line_number"],
+                    ))
 
-                if is_mismatch:
-                    scene_num = _resolve_scene_number(self._scene_boundaries, fact["line_number"])
-                    if scene_num is not None:
-                        scenes_needing_llm.setdefault(scene_num, []).append(fact)
-
-        # F-INT-9 Part 2: LLM-gated confirmation for count/side violations
-        if scenes_needing_llm:
-            sorted_scenes = sorted(
-                self._manuscript_ref.scenes if hasattr(self, '_manuscript_ref') else [],
-                key=lambda s: s.scene_number,
-            )
-            scene_text_map = {s.scene_number: s.text for s in sorted_scenes}
-
-            for scene_num, regex_facts in scenes_needing_llm.items():
-                scene_text = scene_text_map.get(scene_num, "")
-                if not scene_text:
-                    # Fallback: emit as CLASS_B without LLM confirmation
-                    for fact in regex_facts:
-                        findings.append(self._make_scalar_finding(
-                            eid, fact, ledger, severity="CLASS_B",
-                            note="(regex-only, no LLM confirmation)",
-                        ))
-                    continue
-
-                # 3-pass majority vote
-                llm_facts = _majority_vote_extract(entity, scene_text, n_passes=3)
-
-                for fact in regex_facts:
-                    ft = fact["fact_type"]
-                    canonical = fact["canonical"]
-
-                    # Find matching LLM extraction
-                    llm_match = None
-                    for lf in llm_facts:
-                        if lf["fact_type"] == ft:
-                            llm_match = lf
-                            break
-
-                    if llm_match and llm_match["vote_count"] >= 2:
-                        # LLM confirms with majority: check if LLM agrees it's a mismatch
-                        llm_val = llm_match["asserted_value"]
-                        if ft == "count":
-                            llm_mismatch = (llm_val != canonical)
-                        else:  # side
-                            llm_mismatch = (str(llm_val).lower() != str(canonical).lower())
-
-                        if llm_mismatch:
-                            severity = "CLASS_A"
-                            note = f"(LLM-confirmed: {llm_match['vote_count']}/{llm_match['total_passes']} passes)"
-                        else:
-                            # LLM says no mismatch — regex was a false positive
-                            continue
-                    else:
-                        # No majority or no LLM match — CLASS_B advisory
-                        severity = "CLASS_B"
-                        vote_info = f"{llm_match['vote_count']}/{llm_match['total_passes']}" if llm_match else "0/3"
-                        note = f"(LLM-unconfirmed: {vote_info} passes)"
-
-                    findings.append(self._make_scalar_finding(
-                        eid, fact, ledger, severity=severity, note=note,
+            elif ft == "side":
+                if str(asserted).lower() != str(canonical).lower():
+                    prov = _get_provenance(ledger, eid, "side")
+                    prov_str = _provenance_evidence(prov)
+                    findings.append(Finding(
+                        check_id=self.check_id,
+                        severity=_SEVERITY_BY_FACT["side"],
+                        scene_number=_resolve_scene_number(self._scene_boundaries, fact["line_number"]),
+                        description=(
+                            f"Side mismatch: {eid} — manuscript says '{asserted}', "
+                            f"ledger says '{canonical}'. {prov_str}"
+                        ),
+                        evidence=[fact["context"]],
+                        suggested_fix=(
+                            f"Tier 1: correct side reference from '{asserted}' to '{canonical}' "
+                            f"at line {fact['line_number']}."
+                        ),
+                        line_number=fact["line_number"],
                     ))
 
         return findings
-
-    def _make_scalar_finding(self, eid: str, fact: dict, ledger: dict,
-                             severity: str, note: str = "") -> Finding:
-        """Build a Finding for a scalar count/side mismatch."""
-        ft = fact["fact_type"]
-        asserted = fact["asserted"]
-        canonical = fact["canonical"]
-        prov = _get_provenance(ledger, eid, ft)
-        prov_str = _provenance_evidence(prov)
-
-        if ft == "count":
-            desc = (f"Count mismatch: {eid} — manuscript says {asserted}, "
-                    f"ledger says {canonical}. {note} {prov_str}")
-        else:
-            desc = (f"Side mismatch: {eid} — manuscript says '{asserted}', "
-                    f"ledger says '{canonical}'. {note} {prov_str}")
-
-        return Finding(
-            check_id=self.check_id,
-            severity=severity,
-            scene_number=_resolve_scene_number(self._scene_boundaries, fact["line_number"]),
-            description=desc,
-            evidence=[fact["context"]],
-            suggested_fix=(
-                f"Tier 1: correct {ft} from {asserted!r} to {canonical!r} at line {fact['line_number']}."
-            ),
-            line_number=fact["line_number"],
-        )
 
     def _handle_stateful(self, entity: dict, text: str, ledger: dict) -> list[Finding]:
         """Stateful handler: forbidden-state scan (CLASS_B, Tier 2)."""

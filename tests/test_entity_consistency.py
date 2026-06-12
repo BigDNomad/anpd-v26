@@ -333,8 +333,8 @@ class TestScalarHandler:
         findings = check.run(ms, briefs)
         count_findings = [f for f in findings if "Count mismatch" in f.description]
         assert len(count_findings) >= 1
-        assert count_findings[0].severity == "CLASS_B"
-        assert "auto_resolved" in count_findings[0].description
+        # F-INT-9 Part 2: severity is CLASS_A (LLM-confirmed) or CLASS_B (unconfirmed)
+        assert count_findings[0].severity in ("CLASS_A", "CLASS_B")
 
     def test_side_mismatch_is_class_b(self):
         check = EntityConsistencyCheck()
@@ -349,7 +349,8 @@ class TestScalarHandler:
         findings = check.run(ms, briefs)
         side_findings = [f for f in findings if "Side mismatch" in f.description]
         assert len(side_findings) >= 1
-        assert side_findings[0].severity == "CLASS_B"
+        # F-INT-9 Part 2: severity is CLASS_A (LLM-confirmed) or CLASS_B (unconfirmed)
+        assert side_findings[0].severity in ("CLASS_A", "CLASS_B")
 
 
 # ── Test: stateful handler ───────────────────────────────────────────────
@@ -369,7 +370,7 @@ class TestStatefulHandler:
         findings = check.run(ms, briefs)
         fs_findings = [f for f in findings if "Forbidden state" in f.description]
         assert len(fs_findings) >= 1
-        assert fs_findings[0].severity == "CLASS_B"
+        assert fs_findings[0].severity == "CLASS_A"  # F-INT-9 Part 2: upgraded
         assert "Tier 2" in fs_findings[0].suggested_fix
 
 
@@ -545,12 +546,13 @@ class TestSeverityPolicy:
         """The policy map contains exactly the expected mappings."""
         assert _SEVERITY_BY_FACT["designation"] == "CLASS_A"
         assert _SEVERITY_BY_FACT["death_assertion"] == "CLASS_A"
-        assert _SEVERITY_BY_FACT["count"] == "CLASS_B"
-        assert _SEVERITY_BY_FACT["side"] == "CLASS_B"
-        assert _SEVERITY_BY_FACT["forbidden_state"] == "CLASS_B"
-        assert _SEVERITY_BY_FACT["role_violation"] == "CLASS_B"
+        assert _SEVERITY_BY_FACT["count"] == "CLASS_A"          # F-INT-9 Part 2: upgraded
+        assert _SEVERITY_BY_FACT["side"] == "CLASS_A"           # F-INT-9 Part 2: upgraded
+        assert _SEVERITY_BY_FACT["forbidden_state"] == "CLASS_A"  # F-INT-9 Part 2: upgraded
+        assert _SEVERITY_BY_FACT["role_violation"] == "CLASS_A"   # F-INT-9 Part 2: upgraded
 
-    def test_count_finding_is_class_b(self):
+    def test_count_finding_severity(self):
+        """F-INT-9 Part 2: count is LLM-gated — CLASS_A or CLASS_B."""
         check = EntityConsistencyCheck()
         text = "Seven rotors, each one a flat disk."
         ledger = {
@@ -563,9 +565,10 @@ class TestSeverityPolicy:
         findings = check.run(ms, briefs)
         count_f = [f for f in findings if "Count mismatch" in f.description]
         assert len(count_f) >= 1
-        assert all(f.severity == "CLASS_B" for f in count_f)
+        assert all(f.severity in ("CLASS_A", "CLASS_B") for f in count_f)
 
-    def test_side_finding_is_class_b(self):
+    def test_side_finding_severity(self):
+        """F-INT-9 Part 2: side is LLM-gated — CLASS_A or CLASS_B."""
         check = EntityConsistencyCheck()
         text = "Coyle grimaced.\nThe left side of his face was burned."
         ledger = {
@@ -578,9 +581,10 @@ class TestSeverityPolicy:
         findings = check.run(ms, briefs)
         side_f = [f for f in findings if "Side mismatch" in f.description]
         assert len(side_f) >= 1
-        assert all(f.severity == "CLASS_B" for f in side_f)
+        assert all(f.severity in ("CLASS_A", "CLASS_B") for f in side_f)
 
-    def test_forbidden_state_finding_is_class_b(self):
+    def test_forbidden_state_finding_is_class_a(self):
+        """F-INT-9 Part 2: forbidden_state upgraded to CLASS_A."""
         check = EntityConsistencyCheck()
         text = "Coyle grimaced as the medic examined his ankle.\nThe ankle injury made every step agony."
         ledger = {
@@ -593,9 +597,9 @@ class TestSeverityPolicy:
         findings = check.run(ms, briefs)
         fs_f = [f for f in findings if "Forbidden state" in f.description]
         assert len(fs_f) >= 1
-        assert all(f.severity == "CLASS_B" for f in fs_f)
+        assert all(f.severity == "CLASS_A" for f in fs_f)
 
-    def test_role_violation_finding_is_class_b(self):
+    def test_role_violation_finding_is_class_a(self):
         check = EntityConsistencyCheck()
         role_entity = {
             "id": "bw_crew", "canonical_name": "Black Widow crew",
@@ -620,7 +624,7 @@ class TestSeverityPolicy:
             findings = check.run(ms, briefs)
         role_f = [f for f in findings if "Role-binding" in f.description]
         assert len(role_f) >= 1
-        assert all(f.severity == "CLASS_B" for f in role_f)
+        assert all(f.severity == "CLASS_A" for f in role_f)  # F-INT-9 Part 2: upgraded
 
     def test_designation_finding_is_class_a(self):
         check = EntityConsistencyCheck()
