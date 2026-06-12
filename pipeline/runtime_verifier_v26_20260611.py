@@ -94,6 +94,7 @@ class RuntimeVerifier:
         log_file_access: bool = False,
         series_name: str = "",
         book_number: int = 0,
+        book_dir: Optional[str] = None,
     ):
         self.manifest_path = Path(manifest_path)
         self.run_id = run_id
@@ -117,9 +118,18 @@ class RuntimeVerifier:
         metadata = self._manifest_raw.get("metadata", {})
         self._series_name = series_name or metadata.get("series", "")
         self._book_number = book_number or metadata.get("book_number", 1)
-        b_nn = f"b{self._book_number:02d}"
-        base_dir = metadata.get("base_dir", "/anpd/v26")
-        self._book_dir = Path(base_dir) / "series" / self._series_name / b_nn
+
+        # book_dir: if explicitly provided, use it directly so that cert/variant
+        # directories (e.g. b01cert) are scoped correctly.  The {bNN} placeholder
+        # token is derived from the actual directory name, NOT from book_number.
+        if book_dir is not None:
+            self._book_dir = Path(book_dir)
+            self._b_nn_token = self._book_dir.name
+        else:
+            b_nn = f"b{self._book_number:02d}"
+            base_dir = metadata.get("base_dir", "/anpd/v26")
+            self._book_dir = Path(base_dir) / "series" / self._series_name / b_nn
+            self._b_nn_token = b_nn
 
         # State accumulated during run (per design doc §7).
         self.executed_components: dict[str, ComponentExecutionRecord] = {}
@@ -792,10 +802,8 @@ class RuntimeVerifier:
         iteration_index: Optional[int] = None,
     ) -> str:
         """Resolve {series}, {bNN}, {sceneN}, {iteration_index} placeholders."""
-        b_nn = f"b{self._book_number:02d}"
-
         path = path.replace("{series}", self._series_name)
-        path = path.replace("{bNN}", b_nn)
+        path = path.replace("{bNN}", self._b_nn_token)
 
         if iteration_index is not None:
             # {sceneN} resolves to 1-indexed scene number.

@@ -758,6 +758,7 @@ def run_pipeline(args: argparse.Namespace) -> int:
                 log_file_access=False,
                 series_name=os.path.basename(args.series_dir),
                 book_number=pipeline_state.get("book_number") or 1,
+                book_dir=str(book_dir_path),
             )
             print("\n  [runtime_verifier] instantiated — R-rules active between components")
 
