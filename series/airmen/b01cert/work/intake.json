@@ -1,0 +1,80 @@
+{
+  "book_number": 1,
+  "title": "CSAR",
+  "series": "Airmen",
+  "total_chapter_count": 25,
+  "total_scene_count": 100,
+  "target_scene_count": 100,
+  "target_word_count": 90000,
+  "outline_path": "outline.md",
+  "historical_window": {
+    "start_date": "1969-01-01",
+    "end_date": "1969-12-31"
+  },
+  "historical_anchors_in_scope": [
+    "The Ho Chi Minh Trail interdiction air war over Laos (1969)",
+    "AC-119K gunship operations against Trail traffic",
+    "Combat Search and Rescue operations out of Nakhon Phanom (NKP), Thailand",
+    "HH-3E Jolly Green rescue helicopters and the Aerospace Rescue and Recovery Service",
+    "A-1 Skyraider 'Sandy' RESCAP escort and on-scene command",
+    "O-1 Bird Dog forward air control",
+    "Pathet Lao and PAVN (NVA) control of the Laotian panhandle",
+    "Soviet-supplied air defenses including the SA-2 surface-to-air missile",
+    "The officially deniable nature of the US air war in Laos (publicly acknowledged by Souvanna Phouma, June 1969)",
+    "US Type I cipher hardware (KL-7) and the intelligence stakes of its compromise"
+  ],
+  "historical_anchors_out_of_scope": [
+    "Any event dated later than 1969",
+    "The 1975 fall of Saigon (belongs to 'The Beast Cometh')",
+    "The 1973 Paris Peace Accords and US withdrawal completion",
+    "Operation Linebacker (1972)",
+    "The Siege of Dien Bien Phu (1954) on-page — permitted only as Coyle's backstory memory of McGoon, never dramatized in-scene",
+    "South Vietnam ground-combat operations (this is the Laos air war, not the in-country ground war)"
+  ],
+  "series_bible_path": "/anpd/v26/series/airmen/series_bible.json",
+  "character_profiles_path": "/anpd/v26/series/airmen/character_profiles.json",
+  "craft_principles_path": "/anpd/v26/principles/craft_principles.json",
+  "voice_register": "Elmore Leonard-style: lean, dialogue-forward, scenes start late and end early, spare description, strong individuated character voice, period-accurate detail through action not exposition.",
+  "operational_doctrine": [
+    "CSAR mission: recover downed airmen alive (the PJ creed — that others may live).",
+    "Rescue package: Jolly Green (HH-3E), Sandy (A-1 Skyraider RESCAP, on-scene commander), Bird Dog FAC.",
+    "The Laos air war is officially deniable.",
+    "PJs ride the hoist/penetrator down; medics first, operators second.",
+    "Radio reception over karst and jungle is unreliable; transmitting can reveal position."
+  ],
+  "anti_patterns": [
+    "smell-of-room openings unless plot-relevant",
+    "relative time references",
+    "future-tense intrusions",
+    "AI-isms (it's not just X / a testament to / in a world where)",
+    "redundant character reintroductions after first appearance",
+    "lyrical or ornate metaphor (anti-Leonard); keep prose lean and concrete, no decorative flourishes",
+    "round-counting as an emphasized motif (de-emphasized per operator decision; keep only plot-necessary instances)"
+  ],
+  "protagonist": "Danny Archer",
+  "antagonist": "Bounchanh Vorasak",
+  "entity_invariants": {
+    "role_bindings": [
+      {
+        "entity_id": "black_widow_crew",
+        "context": "aboard the gunship",
+        "required_form": "role_only",
+        "forbidden_references": ["Dalton", "Evans", "Vance"],
+        "permitted_roles": ["co-pilot", "sensor operator", "gunner one", "gunner two"]
+      }
+    ],
+    "forbidden_states": [
+      {
+        "entity_id": "coyle",
+        "states": ["eye_socket_injury", "ankle_injury"]
+      }
+    ],
+    "declared_scalars": [
+      {
+        "id": "damage_side",
+        "canonical_name": "Coyle burn/damage side",
+        "invariants": {"side": "right"}
+      }
+    ]
+  }
+}

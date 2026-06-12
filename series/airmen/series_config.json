@@ -1,9 +1,9 @@
 {
   "genre": "historical_war_thriller",
   "series_name": "Airmen",
-  "series_directory": "/anpd/v25/series/airmen",
+  "series_directory": "/anpd/v26/series/airmen",
   "pen_name": "David Lee Corley",
-  "banned_phrases_path": "/anpd/v25/series/airmen/banned_phrases.json",
+  "banned_phrases_path": "/anpd/v26/series/airmen/banned_phrases.json",
   "series_slug": "arm",
   "book_slugs": {
     "b01": "arm001"

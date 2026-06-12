@@ -48,54 +48,41 @@ SCENES_PER_CHAPTER = 4
 # ─── Phase 1 — Preflight (delegating wrapper) ─────────────────────────────────
 
 def handle_preflight(args, pipeline_state) -> dict:
-    """Run preflight via subprocess if available; fall back to inline stub.
+    """Run preflight via subprocess.
 
-    Per design doc §3.1: when preflight.py is built, master_controller
-    invokes it as subprocess. Until then, the inline stub from
-    master_controller's preflight_stub() runs.
+    Per design doc §3.1: master_controller invokes preflight as a
+    subprocess.  The inline stub has been retired; preflight.py is
+    the canonical implementation.
 
     Returns:
         dict with 'verdict' (pass | halt), 'findings' (list of dicts).
     """
-    preflight_script = mc.COMPONENTS["preflight"]
-
-    if os.path.isfile(preflight_script):
-        # Real subprocess invocation when preflight.py exists.
-        result = mc.run_component_subprocess(
-            "preflight",
-            [
-                "--book-dir", args.book_dir,
-                "--series-dir", args.series_dir,
-                "--intake", args.intake,
-                "--series-config", args.series_config,
-            ],
-            args.book_dir,
-            pipeline_state,
-        )
-        if result["stop_report_written_during_call"]:
-            return {"verdict": "halt", "findings": [], "via": "subprocess"}
-        if result["exit_code"] != 0:
-            return {
-                "verdict": "halt",
-                "findings": [{
-                    "class": "A",
-                    "component": "preflight",
-                    "phase": 1,
-                    "message": f"preflight subprocess returned exit code {result['exit_code']}",
-                    "suggested_fix": "review preflight output",
-                }],
-                "via": "subprocess",
-            }
-        return {"verdict": "pass", "findings": [], "via": "subprocess"}
-
-    # Stub path — inline minimal checks.
-    findings = mc.preflight_stub(args, pipeline_state)
-    class_a = [f for f in findings if f["class"] == "A"]
-    return {
-        "verdict": "halt" if class_a else "pass",
-        "findings": findings,
-        "via": "stub",
-    }
+    result = mc.run_component_subprocess(
+        "preflight",
+        [
+            "--book-dir", args.book_dir,
+            "--series-dir", args.series_dir,
+            "--intake", args.intake,
+            "--series-config", args.series_config,
+        ],
+        args.book_dir,
+        pipeline_state,
+    )
+    if result["stop_report_written_during_call"]:
+        return {"verdict": "halt", "findings": [], "via": "subprocess"}
+    if result["exit_code"] != 0:
+        return {
+            "verdict": "halt",
+            "findings": [{
+                "class": "A",
+                "component": "preflight",
+                "phase": 1,
+                "message": f"preflight subprocess returned exit code {result['exit_code']}",
+                "suggested_fix": "review preflight output",
+            }],
+            "via": "subprocess",
+        }
+    return {"verdict": "pass", "findings": [], "via": "subprocess"}
 
 
 # ─── Phase 3 — Synopsis gate ──────────────────────────────────────────────────

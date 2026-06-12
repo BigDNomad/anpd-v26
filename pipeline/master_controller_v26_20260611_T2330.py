@@ -693,25 +693,32 @@ def run_pipeline(args: argparse.Namespace) -> int:
         _finalize_receipt(pipeline_state, args.book_dir)
         return 1
 
-    print("\nPHASE 1b — preflight (stubbed)")
-    findings = preflight_stub(args, pipeline_state)
-    class_a = [f for f in findings if f["class"] == "A"]
-    for f in findings:
-        print(f"  [{f['class']}] {f['message']}")
-
-    if class_a:
-        write_stop_report(
-            book_dir=args.book_dir,
-            component="master_controller",
-            phase=1,
-            error_type="Class A",
-            error_message=(
-                f"preflight Class A finding(s): "
-                f"{[f['message'] for f in class_a]}"
-            ),
-            suggested_fix="address Class A findings listed above",
-            pipeline_state_description="halted at preflight",
-        )
+    print("\nPHASE 1b — preflight")
+    preflight_result = run_component_subprocess(
+        "preflight",
+        [
+            "--book-dir", args.book_dir,
+            "--series-dir", args.series_dir,
+            "--intake", args.intake,
+            "--series-config", args.series_config,
+        ],
+        args.book_dir,
+        pipeline_state,
+    )
+    if preflight_result["stdout"]:
+        for line in preflight_result["stdout"].rstrip().splitlines():
+            print(f"  {line}")
+    if preflight_result["stop_report_written_during_call"] or preflight_result["exit_code"] != 0:
+        if not preflight_result["stop_report_written_during_call"]:
+            write_stop_report(
+                book_dir=args.book_dir,
+                component="preflight",
+                phase=1,
+                error_type="Class A",
+                error_message=f"preflight exited with code {preflight_result['exit_code']}",
+                suggested_fix="review preflight output above",
+                pipeline_state_description="halted at preflight",
+            )
         pipeline_state["hard_stop"] = True
         _finalize_receipt(pipeline_state, args.book_dir)
         return 1

@@ -185,6 +185,10 @@ def _suggested_fix_for(error_code: str) -> str:
         "GIT_REPO_NOT_INITIALIZED":          "run 'git init' at /anpd/v26/",
         "GIT_DIRTY_WORKING_TREE":            "commit or stash uncommitted changes",
         "GIT_NO_COMMITS":                    "make at least one commit before running pipeline",
+        # New-book cleanliness
+        "STALE_RUN_STATE":                   "new_book requires a clean run directory; archive or use a fresh book dir",
+        # Config path integrity
+        "CONFIG_PATH_OUTSIDE_ROOT":          "update the path field to reference a location under the current pipeline root",
     }
     return fixes.get(error_code, "see preflight rule documentation")
 
@@ -707,6 +711,101 @@ def run_environment_rules() -> list[RuleResult]:
     return results
 
 
+# ─── New-book cleanliness rules ──────────────────────────────────────────────
+
+def run_new_book_cleanliness_rules(book_dir: str) -> list[RuleResult]:
+    """N001: new_book run must start from a clean directory — no stale state."""
+    results: list[RuleResult] = []
+    stale_files: list[str] = []
+
+    work_dir = os.path.join(book_dir, "work")
+    out_dir = os.path.join(book_dir, "out")
+
+    # Check for *_state.json phase-state files in work/
+    if os.path.isdir(work_dir):
+        for fname in os.listdir(work_dir):
+            if fname.endswith("_state.json"):
+                stale_files.append(os.path.join(work_dir, fname))
+
+    # Check for prior scenes, state files, or manuscripts in out/
+    scenes_dir = os.path.join(out_dir, "scenes")
+    if os.path.isdir(scenes_dir):
+        for fname in os.listdir(scenes_dir):
+            if fname.endswith(".md") and not fname.startswith("."):
+                stale_files.append(os.path.join(scenes_dir, fname))
+
+    state_dir = os.path.join(out_dir, "state")
+    if os.path.isdir(state_dir):
+        for fname in os.listdir(state_dir):
+            if fname.endswith(".json") and not fname.startswith("."):
+                stale_files.append(os.path.join(state_dir, fname))
+
+    manuscript_path = os.path.join(out_dir, "manuscript.md")
+    if os.path.isfile(manuscript_path):
+        stale_files.append(manuscript_path)
+
+    if stale_files:
+        file_list = "; ".join(os.path.basename(f) for f in stale_files[:10])
+        suffix = f" (and {len(stale_files) - 10} more)" if len(stale_files) > 10 else ""
+        results.append(RuleResult(
+            "N001", False, "STALE_RUN_STATE",
+            f"new_book requires a clean run directory; archive or use a fresh book dir. "
+            f"Stale files: {file_list}{suffix}",
+        ))
+    else:
+        results.append(RuleResult("N001", True))
+
+    return results
+
+
+def run_config_path_integrity_rules(
+    book_dir: str, series_dir: str
+) -> list[RuleResult]:
+    """N002: every path-valued field in series_config/intake must exist and
+    live under the current pipeline root."""
+    results: list[RuleResult] = []
+    bad_fields: list[str] = []
+
+    intake_path = os.path.join(book_dir, "work", "intake.json")
+    series_config_path = os.path.join(series_dir, "series_config.json")
+
+    for config_label, config_path in [
+        ("intake", intake_path),
+        ("series_config", series_config_path),
+    ]:
+        data = _safe_load_json(config_path)
+        if not isinstance(data, dict):
+            continue
+        _check_path_fields(data, config_label, bad_fields)
+
+    if bad_fields:
+        field_list = "; ".join(bad_fields[:10])
+        suffix = f" (and {len(bad_fields) - 10} more)" if len(bad_fields) > 10 else ""
+        results.append(RuleResult(
+            "N002", False, "CONFIG_PATH_OUTSIDE_ROOT",
+            f"Path field(s) outside pipeline root ({V24_ROOT}): {field_list}{suffix}",
+        ))
+    else:
+        results.append(RuleResult("N002", True))
+
+    return results
+
+
+def _check_path_fields(
+    data: dict, prefix: str, bad_fields: list[str]
+) -> None:
+    """Recursively check dict for string values that look like absolute paths."""
+    for key, value in data.items():
+        if isinstance(value, str) and value.startswith("/"):
+            # It's an absolute path — must be under V24_ROOT
+            if not value.startswith(V24_ROOT):
+                bad_fields.append(f"{prefix}.{key}={value}")
+            elif not os.path.exists(value):
+                bad_fields.append(f"{prefix}.{key}={value} (does not exist)")
+        elif isinstance(value, dict):
+            _check_path_fields(value, f"{prefix}.{key}", bad_fields)
+
+
 # ─── Output handlers ──────────────────────────────────────────────────────────
 
 def print_rule_results(results: list[RuleResult]) -> None:
@@ -784,6 +883,15 @@ def run_preflight(book_dir: str, series_dir: str) -> tuple[int, list[RuleResult]
     s_results = run_synopsis_rules(book_dir, series_dir)
     print_rule_results(s_results)
     all_results.extend(s_results)
+
+    print("\n=== Phase N (new-book cleanliness) ===")
+    n1_results = run_new_book_cleanliness_rules(book_dir)
+    print_rule_results(n1_results)
+    all_results.extend(n1_results)
+
+    n2_results = run_config_path_integrity_rules(book_dir, series_dir)
+    print_rule_results(n2_results)
+    all_results.extend(n2_results)
 
     print("\n=== Phase E + G (environment, git) ===")
     e_results = run_environment_rules()
