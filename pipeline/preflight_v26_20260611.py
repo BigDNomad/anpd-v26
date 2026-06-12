@@ -20,6 +20,39 @@ phase executes. Per the rules document P001-P007 behavioral spec:
 Invoked as subprocess by master_controller.py per master_controller V24
 design doc §3.1. CLI: --book-dir, --series-dir, --intake, --series-config.
 
+Stage-aware invocation (--stage flag):
+
+  --stage pre_run        Rules that validate inputs present BEFORE the
+                         pipeline starts.  This is what master_controller
+                         Phase 1b passes for new_book mode.
+  --stage post_synopsis  Full rule set including synopsis-content S-rules
+                         and generated-artifact checks.  Default for
+                         standalone invocation.
+
+Stage classification:
+
+  pre_run:
+    F001-F003,F005,F007  Series-level + intake file existence
+    F013-F021            Pipeline component existence
+    F022                 DLC directory existence
+    V001,V002,V007       Input-file JSON validity (intake, series_bible,
+                         banned_phrases)
+    D001-D014            Intake data contracts
+    N001                 New-book cleanliness (stale state)
+    N002                 Config path integrity
+    E001-E004            Environment (API key, imports)
+    G001-G003            Git status
+
+  post_synopsis (all of pre_run PLUS):
+    F004,F006            Optional series files (name_registry, style_card)
+    F008,F010-F012       Synopsis, book_config, book char profiles, seed state
+    F023-F025            Output directory existence
+    V003-V006,V008,V010  Generated-artifact validity
+    S001-S009            Synopsis content rules
+      NOTE: S-rules duplicate Gate 1 (synopsis_auditor) checks.  The
+      post_synopsis stage is available for standalone use but is NOT
+      wired into the controller pipeline (no double-gating).
+
 Two architectural deviations from preflight_rules_20260417_1200.md, both
 captured as Class B (logged in receipt, pipeline continues) until the
 underlying gap is addressed by other build work:
@@ -56,6 +89,14 @@ from typing import Any
 V24_ROOT = "/anpd/v26"
 PIPELINE_DIR = os.path.join(V24_ROOT, "pipeline")
 SHARED_DIR = os.path.join(V24_ROOT, "shared")
+
+VALID_STAGES = {"pre_run", "post_synopsis"}
+
+# Rules active at each stage. post_synopsis includes everything.
+PRE_RUN_F_RULES = {"F001", "F002", "F003", "F005", "F007",
+                   "F013", "F014", "F015", "F016", "F017", "F018",
+                   "F019", "F020", "F021", "F022"}
+PRE_RUN_V_RULES = {"V001", "V002", "V007"}
 
 VALID_SCENE_COUNTS = {75, 100, 125}
 SYNOPSIS_WORD_MIN = 18000
@@ -237,9 +278,12 @@ def _safe_read_text(path: str) -> str:
 
 # ─── Rule group runners ───────────────────────────────────────────────────────
 
-def run_file_existence_rules(book_dir: str, series_dir: str) -> list[RuleResult]:
+def run_file_existence_rules(
+    book_dir: str, series_dir: str, stage: str = "post_synopsis",
+) -> list[RuleResult]:
     """F001-F025: every required file/dir exists at canonical path."""
     results: list[RuleResult] = []
+    active = PRE_RUN_F_RULES if stage == "pre_run" else None  # None = all
 
     # Series-level (F001-F006)
     series_files = [
@@ -251,6 +295,8 @@ def run_file_existence_rules(book_dir: str, series_dir: str) -> list[RuleResult]
         ("F006", "style_card.md",           "MISSING_STYLE_CARD"),
     ]
     for rule_id, fname, err in series_files:
+        if active is not None and rule_id not in active:
+            continue
         path = os.path.join(series_dir, fname)
         results.append(_check_exists(rule_id, path, err))
 
@@ -263,6 +309,8 @@ def run_file_existence_rules(book_dir: str, series_dir: str) -> list[RuleResult]
         ("F012", "out/state/state_after_sc00.json", "MISSING_SEED_STATE"),
     ]
     for rule_id, rel_path, err in book_files:
+        if active is not None and rule_id not in active:
+            continue
         path = os.path.join(book_dir, rel_path)
         results.append(_check_exists(rule_id, path, err))
 
@@ -279,6 +327,8 @@ def run_file_existence_rules(book_dir: str, series_dir: str) -> list[RuleResult]
         ("F021", "research_pipeline.py",   "MISSING_RESEARCH_PIPELINE"),
     ]
     for rule_id, fname, err in component_rules:
+        if active is not None and rule_id not in active:
+            continue
         path = os.path.join(PIPELINE_DIR, fname)
         present = _exists(path)
         if present:
@@ -297,15 +347,18 @@ def run_file_existence_rules(book_dir: str, series_dir: str) -> list[RuleResult]
             ))
 
     # F022 dlc/ + F023-F025 output dirs
-    results.append(_check_dir_exists(
-        "F022", os.path.join(SHARED_DIR, "dlc"), "MISSING_DLC_DIRECTORY",
-    ))
+    if active is None or "F022" in active:
+        results.append(_check_dir_exists(
+            "F022", os.path.join(SHARED_DIR, "dlc"), "MISSING_DLC_DIRECTORY",
+        ))
     out_dirs = [
         ("F023", "out/scenes",  "MISSING_OUTPUT_SCENES_DIR"),
         ("F024", "out/state",   "MISSING_OUTPUT_STATE_DIR"),
         ("F025", "out/reports", "MISSING_OUTPUT_REPORTS_DIR"),
     ]
     for rule_id, rel, err in out_dirs:
+        if active is not None and rule_id not in active:
+            continue
         results.append(_check_dir_exists(
             rule_id, os.path.join(book_dir, rel), err,
         ))
@@ -325,9 +378,12 @@ def _check_dir_exists(rule_id: str, path: str, err: str) -> RuleResult:
     return RuleResult(rule_id, False, err, f"{path} is not a directory", severity="A")
 
 
-def run_validity_rules(book_dir: str, series_dir: str) -> list[RuleResult]:
+def run_validity_rules(
+    book_dir: str, series_dir: str, stage: str = "post_synopsis",
+) -> list[RuleResult]:
     """V001-V010: JSON parses, markdown non-empty."""
     results: list[RuleResult] = []
+    active = PRE_RUN_V_RULES if stage == "pre_run" else None  # None = all
 
     json_rules = [
         ("V001", os.path.join(book_dir, "work/intake.json"),                     "INTAKE_INVALID_JSON"),
@@ -339,6 +395,8 @@ def run_validity_rules(book_dir: str, series_dir: str) -> list[RuleResult]:
         ("V007", os.path.join(series_dir, "banned_phrases.json"),                "BANNED_PHRASES_INVALID_JSON"),
     ]
     for rule_id, path, err in json_rules:
+        if active is not None and rule_id not in active:
+            continue
         if not _exists(path):
             # Existence is enforced by F-rules; skip validity to avoid double-failure noise.
             results.append(RuleResult(rule_id, True))  # vacuous pass
@@ -353,6 +411,8 @@ def run_validity_rules(book_dir: str, series_dir: str) -> list[RuleResult]:
         ("V010", os.path.join(series_dir, "style_card.md"),   "STYLE_CARD_EMPTY"),
     ]
     for rule_id, path, err in md_rules:
+        if active is not None and rule_id not in active:
+            continue
         if not _exists(path):
             results.append(RuleResult(rule_id, True))  # vacuous pass; F-rule will catch
             continue
@@ -857,20 +917,25 @@ def print_component_inventory() -> None:
 
 # ─── Main entry point ─────────────────────────────────────────────────────────
 
-def run_preflight(book_dir: str, series_dir: str) -> tuple[int, list[RuleResult]]:
-    """Run all rules and return (exit_code, all_results).
+def run_preflight(
+    book_dir: str, series_dir: str, stage: str = "post_synopsis",
+) -> tuple[int, list[RuleResult]]:
+    """Run rules for the given stage and return (exit_code, all_results).
 
     exit_code is 0 if no Class A failures; 1 otherwise.
+    stage: "pre_run" (inputs only) or "post_synopsis" (full rule set).
     """
     all_results: list[RuleResult] = []
 
+    print(f"\n  [preflight] stage={stage}")
+
     print("\n=== Phase F (file existence) ===")
-    f_results = run_file_existence_rules(book_dir, series_dir)
+    f_results = run_file_existence_rules(book_dir, series_dir, stage=stage)
     print_rule_results(f_results)
     all_results.extend(f_results)
 
     print("\n=== Phase V (validity) ===")
-    v_results = run_validity_rules(book_dir, series_dir)
+    v_results = run_validity_rules(book_dir, series_dir, stage=stage)
     print_rule_results(v_results)
     all_results.extend(v_results)
 
@@ -879,10 +944,11 @@ def run_preflight(book_dir: str, series_dir: str) -> tuple[int, list[RuleResult]
     print_rule_results(d_results)
     all_results.extend(d_results)
 
-    print("\n=== Phase S (synopsis) ===")
-    s_results = run_synopsis_rules(book_dir, series_dir)
-    print_rule_results(s_results)
-    all_results.extend(s_results)
+    if stage != "pre_run":
+        print("\n=== Phase S (synopsis) ===")
+        s_results = run_synopsis_rules(book_dir, series_dir)
+        print_rule_results(s_results)
+        all_results.extend(s_results)
 
     print("\n=== Phase N (new-book cleanliness) ===")
     n1_results = run_new_book_cleanliness_rules(book_dir)
@@ -931,9 +997,12 @@ def main(argv: list[str] | None = None) -> int:
                         help="Path to intake.json (kept for CLI consistency; canonical lookup is by book_dir)")
     parser.add_argument("--series-config", required=True,
                         help="Path to series_config.json (kept for CLI consistency)")
+    parser.add_argument("--stage", default="post_synopsis",
+                        choices=sorted(VALID_STAGES),
+                        help="Rule stage: pre_run (inputs only) or post_synopsis (full)")
     args = parser.parse_args(argv)
 
-    exit_code, _ = run_preflight(args.book_dir, args.series_dir)
+    exit_code, _ = run_preflight(args.book_dir, args.series_dir, stage=args.stage)
     return exit_code
 
 

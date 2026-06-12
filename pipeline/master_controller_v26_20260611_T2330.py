@@ -701,6 +701,7 @@ def run_pipeline(args: argparse.Namespace) -> int:
             "--series-dir", args.series_dir,
             "--intake", args.intake,
             "--series-config", args.series_config,
+            "--stage", "pre_run",
         ],
         args.book_dir,
         pipeline_state,
@@ -722,6 +723,10 @@ def run_pipeline(args: argparse.Namespace) -> int:
         pipeline_state["hard_stop"] = True
         _finalize_receipt(pipeline_state, args.book_dir)
         return 1
+
+    # Output-dir bootstrap: create out/ skeleton after preflight passes.
+    for subdir in ("out/scenes", "out/state", "out/reports"):
+        os.makedirs(os.path.join(args.book_dir, subdir), exist_ok=True)
 
     # Dry-run early exit.
     if args.dry_run:

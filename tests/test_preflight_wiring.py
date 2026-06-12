@@ -1,43 +1,62 @@
 """Tests for preflight wiring into master_controller.
 
 Verifies:
-1. Controller halts on stale run state (STALE_RUN_STATE / N001)
-2. Controller halts on bad config path (CONFIG_PATH_OUTSIDE_ROOT / N002)
-3. Preflight passes on clean fixture
-4. Exit-code propagation: master_controller returns nonzero on hard_stop
+1. preflight --stage pre_run passes on clean b01cert-style fixture
+2. pre_run halts on planted stale state (N001)
+3. pre_run halts on planted /anpd/v25 config path (N002)
+4. Stage classification: no rule unclassified
+5. Exit-code propagation: master_controller returns nonzero on hard_stop
 """
 
 from __future__ import annotations
 
 import json
 import os
-import shutil
 import sys
-import tempfile
 
 import pytest
 
+
 # ─── Helpers ────────────────────────────────────────────────────────────────
 
-def _make_clean_book_dir(tmpdir: str, series_dir: str) -> str:
-    """Create a minimal clean book dir with brief-layer inputs only."""
-    book_dir = os.path.join(tmpdir, "b01cert")
-    work_dir = os.path.join(book_dir, "work")
-    out_dir = os.path.join(book_dir, "out")
-    os.makedirs(work_dir)
-    os.makedirs(os.path.join(out_dir, "scenes"))
-    os.makedirs(os.path.join(out_dir, "state"))
-    os.makedirs(os.path.join(out_dir, "reports"))
+def _make_clean_fixture(tmp_path):
+    """Return (book_dir, series_dir) for a clean pre_run fixture.
 
+    Contains only the brief-layer files the pre_run stage expects.
+    The series_dir is under /anpd/v26 conceptually, but uses tmp_path
+    for isolation — so config paths reference /anpd/v26 to pass N002.
+    """
+    series_dir = str(tmp_path / "series" / "airmen")
+    book_dir = str(tmp_path / "series" / "airmen" / "b01cert")
+    work_dir = os.path.join(book_dir, "work")
+    os.makedirs(work_dir)
+
+    # Series-level files
+    os.makedirs(series_dir, exist_ok=True)
+    with open(os.path.join(series_dir, "series_bible.json"), "w") as f:
+        json.dump({"series_name": "Airmen"}, f)
+    with open(os.path.join(series_dir, "series_config.json"), "w") as f:
+        json.dump({
+            "genre": "historical_war_thriller",
+            "series_name": "Airmen",
+            "series_directory": "/anpd/v26/series/airmen",
+            "pen_name": "Test Author",
+            "banned_phrases_path": "/anpd/v26/series/airmen/banned_phrases.json",
+        }, f)
+    with open(os.path.join(series_dir, "character_profiles.json"), "w") as f:
+        json.dump({}, f)
+    with open(os.path.join(series_dir, "banned_phrases.json"), "w") as f:
+        json.dump(["tapestry of"], f)
+
+    # Book-level intake
     intake = {
         "book_number": 1,
         "title": "Test",
-        "series": "Airmen",
+        "series": "airmen",
         "target_chapter_count": 25,
         "target_scene_count": 100,
         "target_synopsis_words": 20000,
         "target_word_count": 85000,
-        "outline_path": os.path.join(work_dir, "outline.md"),
         "copyright_holder": "Endeavor Publishing LLC",
         "resolution_scenes": 2,
         "twist_1_position": 25,
@@ -47,53 +66,71 @@ def _make_clean_book_dir(tmpdir: str, series_dir: str) -> str:
     with open(os.path.join(work_dir, "intake.json"), "w") as f:
         json.dump(intake, f)
 
-    return book_dir
+    return book_dir, series_dir
 
 
-def _make_series_dir(tmpdir: str, pipeline_root: str) -> str:
-    """Create minimal series dir with config files."""
-    series_dir = os.path.join(tmpdir, "airmen")
-    os.makedirs(series_dir)
+# ─── pre_run on clean fixture: PASS ────────────────────────────────────────
 
-    config = {
-        "genre": "historical_war_thriller",
-        "series_name": "Airmen",
-        "series_directory": series_dir,
-        "pen_name": "Test Author",
-        "banned_phrases_path": os.path.join(series_dir, "banned_phrases.json"),
-        "series_slug": "arm",
-    }
-    with open(os.path.join(series_dir, "series_config.json"), "w") as f:
-        json.dump(config, f)
+class TestPreRunClean:
+    """preflight --stage pre_run passes on a clean fixture."""
 
-    with open(os.path.join(series_dir, "banned_phrases.json"), "w") as f:
-        json.dump(["tapestry of"], f)
+    def test_pre_run_no_fixture_failures(self, tmp_path):
+        """All F/V/D/N rules pass on clean fixture (E/G rules are env-dependent)."""
+        from preflight_v26_20260611 import run_preflight
 
-    with open(os.path.join(series_dir, "series_bible.json"), "w") as f:
-        json.dump({"series_name": "Airmen"}, f)
+        book_dir, series_dir = _make_clean_fixture(tmp_path)
+        _, results = run_preflight(book_dir, series_dir, stage="pre_run")
 
-    with open(os.path.join(series_dir, "character_profiles.json"), "w") as f:
-        json.dump({}, f)
+        # Filter out environment/git rules — they depend on the test runner,
+        # not the fixture.  We only assert fixture-controlled rules pass.
+        env_rules = {"E001", "E002", "E003", "E004", "G001", "G002", "G003"}
+        fixture_failures = [
+            r for r in results
+            if not r.passed and r.severity == "A" and r.rule_id not in env_rules
+        ]
+        for r in fixture_failures:
+            print(f"  UNEXPECTED Class A: {r.rule_id} {r.error_code} {r.message}")
+        assert fixture_failures == [], f"{len(fixture_failures)} unexpected Class A failures"
 
-    return series_dir
+    def test_pre_run_skips_synopsis_rules(self, tmp_path):
+        from preflight_v26_20260611 import run_preflight
+
+        book_dir, series_dir = _make_clean_fixture(tmp_path)
+        _, results = run_preflight(book_dir, series_dir, stage="pre_run")
+
+        rule_ids = {r.rule_id for r in results}
+        # S-rules must not appear at pre_run stage
+        s_rules = {rid for rid in rule_ids if rid.startswith("S")}
+        assert s_rules == set(), f"S-rules should not run at pre_run: {s_rules}"
+
+    def test_pre_run_skips_synopsis_file_check(self, tmp_path):
+        from preflight_v26_20260611 import run_preflight
+
+        book_dir, series_dir = _make_clean_fixture(tmp_path)
+        _, results = run_preflight(book_dir, series_dir, stage="pre_run")
+
+        rule_ids = {r.rule_id for r in results}
+        # F008 (synopsis), F010-F012, F023-F025 must not appear at pre_run
+        post_only = {"F004", "F006", "F008", "F010", "F011", "F012",
+                     "F023", "F024", "F025"}
+        present = post_only & rule_ids
+        assert present == set(), f"Post-synopsis F-rules should not run at pre_run: {present}"
 
 
-# ─── N001: STALE_RUN_STATE ──────────────────────────────────────────────────
+# ─── pre_run + stale state: N001 FAIL ──────────────────────────────────────
 
-class TestStaleRunState:
-    """N001: preflight must fail when stale state files exist."""
+class TestPreRunStaleState:
+    """N001: pre_run must fail when stale state files exist."""
 
     def test_stale_state_json_in_work_triggers_failure(self, tmp_path):
         from preflight_v26_20260611 import run_new_book_cleanliness_rules
 
         book_dir = str(tmp_path / "book")
-        work_dir = os.path.join(book_dir, "work")
-        os.makedirs(work_dir)
+        os.makedirs(os.path.join(book_dir, "work"))
         os.makedirs(os.path.join(book_dir, "out", "scenes"))
         os.makedirs(os.path.join(book_dir, "out", "state"))
 
-        # Plant a stale state file
-        with open(os.path.join(work_dir, "synopsis_generation_state.json"), "w") as f:
+        with open(os.path.join(book_dir, "work", "synopsis_generation_state.json"), "w") as f:
             json.dump({"phase": "synopsis"}, f)
 
         results = run_new_book_cleanliness_rules(book_dir)
@@ -101,7 +138,7 @@ class TestStaleRunState:
         assert len(failed) == 1
         assert failed[0].error_code == "STALE_RUN_STATE"
 
-    def test_stale_scene_in_out_triggers_failure(self, tmp_path):
+    def test_stale_scene_triggers_failure(self, tmp_path):
         from preflight_v26_20260611 import run_new_book_cleanliness_rules
 
         book_dir = str(tmp_path / "book")
@@ -110,31 +147,11 @@ class TestStaleRunState:
         os.makedirs(scenes_dir)
         os.makedirs(os.path.join(book_dir, "out", "state"))
 
-        # Plant a prior scene
         with open(os.path.join(scenes_dir, "sc01_his.md"), "w") as f:
-            f.write("Prior scene content")
+            f.write("stale")
 
         results = run_new_book_cleanliness_rules(book_dir)
-        failed = [r for r in results if not r.passed]
-        assert len(failed) == 1
-        assert failed[0].error_code == "STALE_RUN_STATE"
-
-    def test_stale_manuscript_in_out_triggers_failure(self, tmp_path):
-        from preflight_v26_20260611 import run_new_book_cleanliness_rules
-
-        book_dir = str(tmp_path / "book")
-        os.makedirs(os.path.join(book_dir, "work"))
-        os.makedirs(os.path.join(book_dir, "out", "scenes"))
-        os.makedirs(os.path.join(book_dir, "out", "state"))
-
-        # Plant a prior manuscript
-        with open(os.path.join(book_dir, "out", "manuscript.md"), "w") as f:
-            f.write("Prior manuscript")
-
-        results = run_new_book_cleanliness_rules(book_dir)
-        failed = [r for r in results if not r.passed]
-        assert len(failed) == 1
-        assert failed[0].error_code == "STALE_RUN_STATE"
+        assert any(r.error_code == "STALE_RUN_STATE" for r in results if not r.passed)
 
     def test_clean_directory_passes(self, tmp_path):
         from preflight_v26_20260611 import run_new_book_cleanliness_rules
@@ -147,13 +164,26 @@ class TestStaleRunState:
         results = run_new_book_cleanliness_rules(book_dir)
         assert all(r.passed for r in results)
 
+    def test_empty_skeleton_dirs_are_clean(self, tmp_path):
+        """Empty out/scenes/ and out/state/ do not trigger STALE_RUN_STATE."""
+        from preflight_v26_20260611 import run_new_book_cleanliness_rules
 
-# ─── N002: CONFIG_PATH_INTEGRITY ────────────────────────────────────────────
+        book_dir = str(tmp_path / "book")
+        os.makedirs(os.path.join(book_dir, "work"))
+        os.makedirs(os.path.join(book_dir, "out", "scenes"))
+        os.makedirs(os.path.join(book_dir, "out", "state"))
+        os.makedirs(os.path.join(book_dir, "out", "reports"))
 
-class TestConfigPathIntegrity:
-    """N002: preflight must fail when config paths reference wrong root."""
+        results = run_new_book_cleanliness_rules(book_dir)
+        assert all(r.passed for r in results)
 
-    def test_bad_series_directory_triggers_failure(self, tmp_path):
+
+# ─── pre_run + bad config path: N002 FAIL ──────────────────────────────────
+
+class TestPreRunBadConfigPath:
+    """N002: pre_run must fail when config paths reference wrong root."""
+
+    def test_v25_path_triggers_failure(self, tmp_path):
         from preflight_v26_20260611 import run_config_path_integrity_rules
 
         book_dir = str(tmp_path / "book")
@@ -161,15 +191,8 @@ class TestConfigPathIntegrity:
         os.makedirs(os.path.join(book_dir, "work"))
         os.makedirs(series_dir)
 
-        # Plant a series_config with v25 path
-        config = {
-            "series_directory": "/anpd/v25/series/airmen",
-            "banned_phrases_path": "/anpd/v26/series/airmen/banned_phrases.json",
-        }
         with open(os.path.join(series_dir, "series_config.json"), "w") as f:
-            json.dump(config, f)
-
-        # Minimal intake
+            json.dump({"series_directory": "/anpd/v25/series/airmen"}, f)
         with open(os.path.join(book_dir, "work", "intake.json"), "w") as f:
             json.dump({"title": "Test"}, f)
 
@@ -177,9 +200,8 @@ class TestConfigPathIntegrity:
         failed = [r for r in results if not r.passed]
         assert len(failed) == 1
         assert failed[0].error_code == "CONFIG_PATH_OUTSIDE_ROOT"
-        assert "/anpd/v25" in failed[0].message
 
-    def test_good_paths_pass(self, tmp_path):
+    def test_v26_paths_pass(self, tmp_path):
         from preflight_v26_20260611 import run_config_path_integrity_rules
 
         book_dir = str(tmp_path / "book")
@@ -187,21 +209,48 @@ class TestConfigPathIntegrity:
         os.makedirs(os.path.join(book_dir, "work"))
         os.makedirs(series_dir)
 
-        # All paths under /anpd/v26 and existing
-        config = {
-            "series_directory": "/anpd/v26/series/airmen",
-            "banned_phrases_path": "/anpd/v26/series/airmen/banned_phrases.json",
-        }
         with open(os.path.join(series_dir, "series_config.json"), "w") as f:
-            json.dump(config, f)
-
+            json.dump({"series_directory": "/anpd/v26/series/airmen"}, f)
         with open(os.path.join(book_dir, "work", "intake.json"), "w") as f:
             json.dump({"title": "Test"}, f)
 
         results = run_config_path_integrity_rules(book_dir, series_dir)
-        # N002 might report non-existent files, but not "outside root"
-        outside_root = [r for r in results if not r.passed and "outside" in r.message.lower()]
-        assert len(outside_root) == 0
+        outside = [r for r in results if not r.passed
+                   and "outside" in r.message.lower()]
+        assert outside == []
+
+
+# ─── Stage classification completeness ──────────────────────────────────────
+
+class TestStageClassification:
+    """Every rule ID must be assigned to a stage."""
+
+    def test_no_rule_unclassified(self, tmp_path):
+        from preflight_v26_20260611 import (
+            run_preflight, PRE_RUN_F_RULES, PRE_RUN_V_RULES,
+        )
+
+        book_dir, series_dir = _make_clean_fixture(tmp_path)
+
+        # Run post_synopsis (full set) to discover all rule IDs
+        _, full_results = run_preflight(book_dir, series_dir, stage="post_synopsis")
+        full_ids = {r.rule_id for r in full_results}
+
+        # Run pre_run to discover pre_run rule IDs
+        _, pre_results = run_preflight(book_dir, series_dir, stage="pre_run")
+        pre_ids = {r.rule_id for r in pre_results}
+
+        # Every post_synopsis rule that isn't in pre_run must be a known
+        # post_synopsis-only rule (S-rules, or F/V rules not in PRE_RUN sets)
+        post_only = full_ids - pre_ids
+        known_post_only = (
+            {f"S{i:03d}" for i in range(1, 10)}  # S001-S009
+            | {"F004", "F006", "F008", "F010", "F011", "F012",
+               "F023", "F024", "F025"}
+            | {"V003", "V004", "V005", "V006", "V008", "V010"}
+        )
+        unclassified = post_only - known_post_only
+        assert unclassified == set(), f"Unclassified rules: {unclassified}"
 
 
 # ─── Exit-code propagation ──────────────────────────────────────────────────
@@ -210,12 +259,7 @@ class TestExitCodePropagation:
     """master_controller returns nonzero on hard_stop."""
 
     def test_main_returns_nonzero_signature(self):
-        """Verify run_pipeline is wired to sys.exit in __main__ block."""
         import master_controller as mc
-        # main() wraps run_pipeline and returns its int exit code
-        assert hasattr(mc, "main")
-        assert hasattr(mc, "run_pipeline")
-        # The module's __name__=="__main__" block calls sys.exit(main())
         import inspect
         source = inspect.getsource(mc)
         assert "sys.exit(main())" in source

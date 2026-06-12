@@ -1,11 +1,13 @@
 {
   "book_number": 1,
   "title": "CSAR",
-  "series": "Airmen",
+  "series": "airmen",
   "total_chapter_count": 25,
+  "target_chapter_count": 25,
   "total_scene_count": 100,
   "target_scene_count": 100,
   "target_word_count": 90000,
+  "target_synopsis_words": 20000,
   "outline_path": "outline.md",
   "historical_window": {
     "start_date": "1969-01-01",

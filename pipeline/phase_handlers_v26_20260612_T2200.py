@@ -64,6 +64,7 @@ def handle_preflight(args, pipeline_state) -> dict:
             "--series-dir", args.series_dir,
             "--intake", args.intake,
             "--series-config", args.series_config,
+            "--stage", "pre_run",
         ],
         args.book_dir,
         pipeline_state,
