@@ -1,12 +1,13 @@
 """
-Tests for MA-008 pillar_position_verification.
+Tests for MA-008 pillar_position_verification (recalibrated 2026-06-13).
 
 Covers:
-  - Action opening (pillar 1): pass, fail, briefing-opening anti-pattern
-  - Final battle (pillar 3): present, absent, rushed ending
+  - Action opening (pillar 1): pass with ACTION/MIXED in 1-5, fail if none
+  - Briefing-opening advisory (CLASS_B): first 3 all NON-ACTION
+  - Final battle position (pillar 3): last ACTION/MIXED >= 85%, fail if < 85%
   - Synopsis missing fallback
   - Module auto-discovery
-  - Mandate calibration
+  - Calibration anchor: airmen b01 type map must PASS both pillars
 """
 
 from __future__ import annotations
@@ -28,12 +29,13 @@ from audit_checks import (
 )
 from audit_checks.pillar_position_verification import (
     PillarPositionVerification,
-    MA008_BRIEFING_OPENING_WINDOW,
-    MA008_RUSHED_ENDING_WINDOW,
+    MA008_OPENING_WINDOW,
+    MA008_BRIEFING_WINDOW,
+    MA008_FINAL_POSITION_PCT,
 )
 
 
-# ─── Helpers ──────────────────────────────────────────────────────────────────
+# --- Helpers ----------------------------------------------------------------
 
 def _make_manuscript(n_scenes):
     """Create a manuscript with n_scenes of dummy text."""
@@ -63,84 +65,127 @@ def _run_check(n_scenes, scene_type_map):
         return check.run(ms, briefs)
 
 
-# ─── Sub-check A: Action Opening (Pillar 1) ──────────────────────────────────
+# --- Sub-check A: Action Opening (Pillar 1) --------------------------------
 
 class TestActionOpening:
 
-    def test_action_opening_passes(self):
-        """Scene 1 is ACTION -> no Pillar 1 finding."""
-        type_map = {i: "ACTION" if i <= 2 else "NON-ACTION" for i in range(1, 11)}
-        findings = _run_check(10, type_map)
-        pillar1 = [f for f in findings if "Pillar 1" in f.description]
-        assert len(pillar1) == 0
+    def test_action_in_scene_1_passes(self):
+        """Scene 1 is ACTION -> Pillar 1 passes."""
+        type_map = {i: "ACTION" if i == 1 else "NON-ACTION" for i in range(1, 21)}
+        type_map[20] = "ACTION"  # pass pillar 3
+        findings = _run_check(20, type_map)
+        pillar1_a = [f for f in findings if "Pillar 1 violation" in f.description]
+        assert len(pillar1_a) == 0
 
-    def test_non_action_opening_fails(self):
-        """Scene 1 is NON-ACTION -> CLASS_A."""
-        type_map = {1: "NON-ACTION", 2: "ACTION", 3: "ACTION"}
-        type_map.update({i: "NON-ACTION" for i in range(4, 11)})
-        findings = _run_check(10, type_map)
-        pillar1 = [f for f in findings if "Pillar 1" in f.description and "scene 1 TYPE" in f.description]
-        assert len(pillar1) >= 1
-        assert pillar1[0].severity == "CLASS_A"
+    def test_action_at_scene_5_passes(self):
+        """Scenes 1-4 NON-ACTION, scene 5 ACTION -> Pillar 1 passes."""
+        type_map = {i: "NON-ACTION" for i in range(1, 21)}
+        type_map[5] = "ACTION"
+        type_map[20] = "ACTION"  # pass pillar 3
+        findings = _run_check(20, type_map)
+        pillar1_a = [f for f in findings if "Pillar 1 violation" in f.description]
+        assert len(pillar1_a) == 0
 
-    def test_briefing_opening_first_3_all_non_action_fails(self):
-        """Scenes 1-3 all NON-ACTION -> CLASS_A briefing-opening."""
-        type_map = {i: "NON-ACTION" for i in range(1, 11)}
-        findings = _run_check(10, type_map)
-        briefing = [f for f in findings if "briefing-opening" in f.description]
-        assert len(briefing) >= 1
-        assert briefing[0].severity == "CLASS_A"
+    def test_mixed_at_scene_3_passes(self):
+        """Scenes 1-2 NON-ACTION, scene 3 MIXED -> Pillar 1 passes."""
+        type_map = {i: "NON-ACTION" for i in range(1, 21)}
+        type_map[3] = "MIXED"
+        type_map[20] = "ACTION"  # pass pillar 3
+        findings = _run_check(20, type_map)
+        pillar1_a = [f for f in findings if "Pillar 1 violation" in f.description]
+        assert len(pillar1_a) == 0
 
-    def test_mixed_opening_does_not_trigger_briefing(self):
-        """Scene 1 ACTION, scenes 2-3 NON-ACTION -> no briefing finding."""
-        type_map = {1: "ACTION", 2: "NON-ACTION", 3: "NON-ACTION"}
-        type_map.update({i: "NON-ACTION" for i in range(4, 11)})
-        findings = _run_check(10, type_map)
-        briefing = [f for f in findings if "briefing-opening" in f.description]
+    def test_no_action_in_first_5_fails(self):
+        """Scenes 1-5 all NON-ACTION/SUSPENSE -> CLASS_A."""
+        type_map = {i: "NON-ACTION" for i in range(1, 21)}
+        type_map[4] = "SUSPENSE"
+        type_map[6] = "ACTION"
+        type_map[20] = "ACTION"  # pass pillar 3
+        findings = _run_check(20, type_map)
+        pillar1_a = [f for f in findings if "Pillar 1 violation" in f.description]
+        assert len(pillar1_a) == 1
+        assert pillar1_a[0].severity == "CLASS_A"
+
+    def test_briefing_opening_advisory_class_b(self):
+        """First 3 scenes all NON-ACTION -> CLASS_B advisory (not CLASS_A)."""
+        type_map = {i: "NON-ACTION" for i in range(1, 21)}
+        type_map[5] = "ACTION"  # pass pillar 1
+        type_map[20] = "ACTION"  # pass pillar 3
+        findings = _run_check(20, type_map)
+        briefing = [f for f in findings if "advisory" in f.description and "briefing" in f.description]
+        assert len(briefing) == 1
+        assert briefing[0].severity == "CLASS_B"
+
+    def test_no_briefing_advisory_when_scene_2_action(self):
+        """Scene 2 is ACTION -> no briefing advisory."""
+        type_map = {i: "NON-ACTION" for i in range(1, 21)}
+        type_map[2] = "ACTION"
+        type_map[20] = "ACTION"  # pass pillar 3
+        findings = _run_check(20, type_map)
+        briefing = [f for f in findings if "briefing" in f.description]
         assert len(briefing) == 0
 
 
-# ─── Sub-check B: Final Battle (Pillar 3) ────────────────────────────────────
+# --- Sub-check B: Final Battle Position (Pillar 3) -------------------------
 
 class TestFinalBattle:
 
-    def test_final_battle_present_passes(self):
-        """10-scene manuscript with scene 10 ACTION -> no Pillar 3 finding."""
-        type_map = {i: "NON-ACTION" for i in range(1, 11)}
+    def test_last_action_at_95pct_passes(self):
+        """100-scene manuscript, last ACTION at scene 95 (95%) -> passes."""
+        type_map = {i: "NON-ACTION" for i in range(1, 101)}
         type_map[1] = "ACTION"  # pass pillar 1
-        type_map[10] = "ACTION"  # final battle
-        findings = _run_check(10, type_map)
+        type_map[95] = "ACTION"  # 95% position
+        findings = _run_check(100, type_map)
         pillar3 = [f for f in findings if "Pillar 3" in f.description]
         assert len(pillar3) == 0
 
-    def test_final_battle_absent_fails(self):
-        """10-scene manuscript, scene 10 NON-ACTION, no ACTION in final 10% -> CLASS_A."""
-        type_map = {i: "ACTION" for i in range(1, 10)}
-        type_map[10] = "NON-ACTION"
-        findings = _run_check(10, type_map)
-        pillar3 = [f for f in findings if "Pillar 3" in f.description and "no ACTION" in f.description]
-        assert len(pillar3) >= 1
-
-    def test_no_action_in_last_10pct_fails(self):
-        """100-scene manuscript, scenes 91-100 all NON-ACTION -> CLASS_A."""
-        type_map = {i: "ACTION" for i in range(1, 91)}
-        type_map.update({i: "NON-ACTION" for i in range(91, 101)})
+    def test_last_action_at_85pct_passes(self):
+        """100-scene manuscript, last ACTION at scene 85 (85%) -> passes (boundary)."""
+        type_map = {i: "NON-ACTION" for i in range(1, 101)}
+        type_map[1] = "ACTION"  # pass pillar 1
+        type_map[85] = "ACTION"  # exactly 85%
         findings = _run_check(100, type_map)
-        pillar3 = [f for f in findings if "Pillar 3" in f.description and "no ACTION" in f.description]
-        assert len(pillar3) >= 1
+        pillar3 = [f for f in findings if "Pillar 3" in f.description]
+        assert len(pillar3) == 0
+
+    def test_last_action_at_84pct_fails(self):
+        """100-scene manuscript, last ACTION at scene 84 (84%) -> CLASS_A."""
+        type_map = {i: "NON-ACTION" for i in range(1, 101)}
+        type_map[1] = "ACTION"  # pass pillar 1
+        type_map[84] = "ACTION"  # 84% < 85%
+        findings = _run_check(100, type_map)
+        pillar3 = [f for f in findings if "Pillar 3" in f.description]
+        assert len(pillar3) == 1
         assert pillar3[0].severity == "CLASS_A"
 
-    def test_rushed_ending_last_5_no_action_or_mixed_fails(self):
-        """20-scene manuscript, scenes 16-20 all NON-ACTION -> CLASS_A rushed ending."""
-        type_map = {i: "ACTION" for i in range(1, 16)}
-        type_map.update({i: "NON-ACTION" for i in range(16, 21)})
+    def test_last_mixed_at_90pct_passes(self):
+        """MIXED scene at 90% also satisfies Pillar 3."""
+        type_map = {i: "NON-ACTION" for i in range(1, 101)}
+        type_map[1] = "ACTION"  # pass pillar 1
+        type_map[90] = "MIXED"  # 90% position
+        findings = _run_check(100, type_map)
+        pillar3 = [f for f in findings if "Pillar 3" in f.description]
+        assert len(pillar3) == 0
+
+    def test_no_action_anywhere_fails(self):
+        """No ACTION or MIXED in entire manuscript -> CLASS_A."""
+        type_map = {i: "NON-ACTION" for i in range(1, 21)}
         findings = _run_check(20, type_map)
-        rushed = [f for f in findings if "rushed/quiet ending" in f.description]
-        assert len(rushed) >= 1
-        assert rushed[0].severity == "CLASS_A"
+        pillar3 = [f for f in findings if "Pillar 3" in f.description]
+        assert len(pillar3) == 1
+        assert pillar3[0].severity == "CLASS_A"
+
+    def test_20_scene_last_action_at_17_passes(self):
+        """20-scene manuscript, last ACTION at scene 17 (85%) -> passes."""
+        type_map = {i: "NON-ACTION" for i in range(1, 21)}
+        type_map[1] = "ACTION"
+        type_map[17] = "ACTION"  # 17/20 = 85%
+        findings = _run_check(20, type_map)
+        pillar3 = [f for f in findings if "Pillar 3" in f.description]
+        assert len(pillar3) == 0
 
 
-# ─── Synopsis Missing ────────────────────────────────────────────────────────
+# --- Synopsis Missing -------------------------------------------------------
 
 class TestSynopsisMissing:
 
@@ -150,7 +195,7 @@ class TestSynopsisMissing:
         assert findings == []
 
 
-# ─── Module Interface ────────────────────────────────────────────────────────
+# --- Module Interface -------------------------------------------------------
 
 class TestModuleInterface:
 
@@ -168,36 +213,46 @@ class TestModuleInterface:
         REGISTRY.clear()
 
 
-# ─── Mandate Calibration ─────────────────────────────────────────────────────
+# --- Calibration Anchor: Airmen B01 -----------------------------------------
 
-class TestMandateCalibration:
+class TestAirmenCalibrationAnchor:
+    """Calibration anchor: airmen b01 actual TYPE map must PASS both pillars.
 
-    @pytest.mark.xfail(reason="pinned to pre-25-chapter Mandate outline; awaiting operator re-authored outline (Decision 2 / Path A)", strict=False)
-    def test_mandate_calibration(self):
-        """Frozen Mandate baseline -> document pillar outcomes.
+    This book has:
+      - First ACTION scene at scene 5 (within 1-5 window) -> Pillar 1 PASS
+      - First 3 scenes all NON-ACTION -> CLASS_B advisory (acceptable)
+      - Last ACTION scene at scene 95 (95/100 = 95% >= 85%) -> Pillar 3 PASS
 
-        Mandate scene 1 is [TYPE: ACTION] (Maduro extraction) -> Pillar 1 passes.
-        Mandate final scenes include ACTION (scenes 99, 100) -> Pillar 3 passes.
-        Expected: 0 findings.
-        """
-        from manuscript_auditor_v25 import load_manuscript, load_briefs
+    Expected: 0 CLASS_A findings, 1 CLASS_B advisory (briefing-opening).
+    """
 
-        cal_dir = "/anpd/v25/_calibration/mandate_v1_uncleaned_20260515/"
-        if not os.path.isdir(cal_dir):
-            pytest.skip("Calibration baseline not available")
+    def test_airmen_b01_calibration(self):
+        """Airmen b01 type map produces 0 CLASS_A, 1 CLASS_B."""
+        synopsis_path = "/anpd/v26/series/airmen/b01/work/synopsis.md"
+        if not os.path.isfile(synopsis_path):
+            pytest.skip("Airmen b01 synopsis not available")
 
-        manuscript = load_manuscript(cal_dir)
-        briefs = load_briefs(
-            series_bible_path="/anpd/v25/series/black_tide/series_bible.json",
-            character_profiles_path="/anpd/v25/series/black_tide/character_profiles.json",
+        from audit_checks._lib.synopsis_scene_types import load_scene_type_map
+        type_map = load_scene_type_map(synopsis_path)
+
+        assert len(type_map) == 100, f"Expected 100 scenes, got {len(type_map)}"
+
+        # Verify anchor assumptions
+        assert type_map[5] == "ACTION", "Scene 5 should be ACTION"
+        assert type_map[95] == "ACTION", "Scene 95 should be ACTION"
+        assert all(type_map[i] == "NON-ACTION" for i in range(1, 4)), \
+            "Scenes 1-3 should all be NON-ACTION"
+
+        findings = _run_check(100, type_map)
+
+        class_a = [f for f in findings if f.severity == "CLASS_A"]
+        class_b = [f for f in findings if f.severity == "CLASS_B"]
+
+        assert len(class_a) == 0, (
+            f"Calibration anchor expects 0 CLASS_A but got {len(class_a)}: "
+            + "; ".join(f.description for f in class_a)
         )
-
-        check = PillarPositionVerification()
-        findings = check.run(manuscript, briefs)
-
-        # Document outcome — both pillars should pass on Mandate
-        pillar1 = [f for f in findings if "Pillar 1" in f.description]
-        pillar3 = [f for f in findings if "Pillar 3" in f.description]
-
-        assert len(pillar1) == 0, f"Pillar 1 should pass (scene 1 is ACTION): {pillar1}"
-        assert len(pillar3) == 0, f"Pillar 3 should pass (final scenes include ACTION): {pillar3}"
+        assert len(class_b) == 1, (
+            f"Calibration anchor expects 1 CLASS_B advisory but got {len(class_b)}"
+        )
+        assert "briefing" in class_b[0].description

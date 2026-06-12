@@ -190,6 +190,34 @@
       },
       "arc_book_1": "Dies in the opening sequence retrieving the cipher chassis. Named because his death matters — the enemy has young soldiers who die badly too, and the book will not let the reader forget it.",
       "motifs": {}
+    },
+    {
+      "name": "Bounmy",
+      "role": "Minor; Pathet Lao field commander under Bounchanh at the command post"
+    },
+    {
+      "name": "Briggs",
+      "role": "Minor; Black Widow AC-119K sensor operator, killed in SAM explosion"
+    },
+    {
+      "name": "Harwick",
+      "role": "Minor; Black Widow co-pilot who ejected over karst, fate unknown"
+    },
+    {
+      "name": "Paulson",
+      "role": "Minor; Black Widow minigun gunner, killed by shrapnel at gun mount"
+    },
+    {
+      "name": "Phomma",
+      "role": "Minor; Pathet Lao Sergeant under Bounchanh, positioned on north ridge"
+    },
+    {
+      "name": "Phommasack",
+      "role": "Minor; Pathet Lao Lieutenant reporting to Bounchanh, commands search cordons"
+    },
+    {
+      "name": "Whitfield",
+      "role": "Minor; Colonel at Nakhon Phanom RTAFB, operations commander overseeing CSAR"
     }
   ]
 }
