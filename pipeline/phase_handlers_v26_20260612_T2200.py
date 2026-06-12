@@ -149,12 +149,12 @@ def handle_synopsis_gate(args, pipeline_state, effective_config) -> dict:
                 phase=3,
             )
 
-        # 2. Locate produced synopsis
-        synopsis_path = mc.find_latest_file(work_dir, "synopsis_*.md")
-        if synopsis_path is None:
+        # 2. Locate produced synopsis — contract path, not glob
+        synopsis_path = os.path.join(work_dir, "synopsis.md")
+        if not os.path.isfile(synopsis_path):
             return _wrap_class_a(
                 "synopsis_generator",
-                f"no synopsis_*.md produced in {work_dir}",
+                f"contract path {synopsis_path} not found after generation",
                 phase=3,
             )
 
