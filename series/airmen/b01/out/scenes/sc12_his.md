@@ -16,7 +16,7 @@ But the battery had been waiting on that ridgeline for three weeks. He had posit
 
 He reached into his breast pocket and touched the blue ribbon without taking it out. A habit. He left it where it was.
 
-The notebook was on the table behind him. He did not need to open it to know the count. Eleven aircraft since he had taken command of this province. Two fighters, one reconnaissance plane, three helicopters, four transport aircraft of various types, and now this gunship. The gunship was the most significant. He had seen the AC-119 work before, had watched from a hillside while one turned a column of trucks into burning scrap in under four minutes. They were not fast and they were not nimble but they were patient and they were accurate and they came back. You could not simply hide from them. You had to kill them.
+The notebook was on the table behind him. He did not need to open it to know the count. Eleven aircraft since he had taken command of this province. Two fighters, one reconnaissance plane, three helicopters, four transport aircraft of various types, and now this gunship. The gunship was the most significant. He had seen the AC-119K work before, had watched from a hillside while one turned a column of trucks into burning scrap in under four minutes. They were not fast and they were not nimble but they were patient and they were accurate and they came back. You could not simply hide from them. You had to kill them.
 
 He had killed this one.
 

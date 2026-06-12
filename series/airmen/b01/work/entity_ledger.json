@@ -47,24 +47,6 @@
       }
     },
     {
-      "id": "coyle_burn_side",
-      "canonical_name": "Coyle burn damage",
-      "aliases": [],
-      "entity_class": "scalar",
-      "invariants": {
-        "side": "right"
-      }
-    },
-    {
-      "id": "coyle_broken_leg",
-      "canonical_name": "Coyle broken leg",
-      "aliases": [],
-      "entity_class": "scalar",
-      "invariants": {
-        "side": "left"
-      }
-    },
-    {
       "id": "khamla",
       "canonical_name": "Khamla",
       "aliases": ["Private Khamla", "the private"],
@@ -126,16 +108,6 @@
       "origin": "synopsis",
       "resolution": "unanimous",
       "source_lines": [29, 47, 67, 77, 82, 106, 113, 114, 120]
-    },
-    "coyle_burn_side.side": {
-      "origin": "synopsis",
-      "resolution": "unanimous",
-      "source_lines": [82]
-    },
-    "coyle_broken_leg.side": {
-      "origin": "synopsis",
-      "resolution": "unanimous",
-      "source_lines": [82]
     },
     "khamla.lifecycle": {
       "origin": "synopsis",
