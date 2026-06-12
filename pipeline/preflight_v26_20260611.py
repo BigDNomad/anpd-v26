@@ -680,10 +680,19 @@ def run_environment_rules() -> list[RuleResult]:
     """E001-E004 + G001-G003 (E005 deduplicated with G002)."""
     results: list[RuleResult] = []
 
-    # E001 ANTHROPIC_API_KEY
+    # E001 ANTHROPIC_API_KEY — check env var and ~/.anthropic/api_key fallback
+    api_key_found = bool(os.environ.get("ANTHROPIC_API_KEY"))
+    if not api_key_found:
+        key_file = os.path.expanduser("~/.anthropic/api_key")
+        if os.path.isfile(key_file):
+            try:
+                with open(key_file, "r") as fh:
+                    api_key_found = bool(fh.read().strip())
+            except OSError:
+                pass
     results.append(_assert(
-        "E001", bool(os.environ.get("ANTHROPIC_API_KEY")),
-        "MISSING_API_KEY", "ANTHROPIC_API_KEY environment variable not set",
+        "E001", api_key_found,
+        "MISSING_API_KEY", "ANTHROPIC_API_KEY not set and ~/.anthropic/api_key not found",
     ))
     # E002 import anthropic
     try:

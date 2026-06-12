@@ -53,6 +53,11 @@
     "lyrical or ornate metaphor (anti-Leonard); keep prose lean and concrete, no decorative flourishes",
     "round-counting as an emphasized motif (de-emphasized per operator decision; keep only plot-necessary instances)"
   ],
+  "copyright_holder": "Endeavor Publishing LLC",
+  "resolution_scenes": 2,
+  "twist_1_position": 25,
+  "twist_2_position": 50,
+  "twist_3_position": 75,
   "protagonist": "Danny Archer",
   "antagonist": "Bounchanh Vorasak",
   "entity_invariants": {
