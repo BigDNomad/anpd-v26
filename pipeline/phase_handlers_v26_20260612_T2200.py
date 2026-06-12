@@ -132,6 +132,7 @@ def handle_synopsis_gate(args, pipeline_state, effective_config) -> dict:
             "--character-profiles", character_profiles_path,
             "--series-bible", series_bible_path,
             "--output-dir", work_dir,
+            "--series-config", args.series_config,
         ]
 
         gen_result = mc.run_component_subprocess(

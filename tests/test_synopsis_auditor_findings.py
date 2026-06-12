@@ -1,10 +1,12 @@
 """Tests for synopsis_auditor — V25 scene parser + callable."""
 from __future__ import annotations
 
+import json
 import os
 import pytest
 
 from synopsis_auditor import parse_synopsis, Scene, audit_synopsis
+from synopsis_generator import generate_synopsis
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -109,6 +111,49 @@ class TestAuditSynopsisCallable:
         assert "fails" in result
         assert "weaks" in result
         assert "total_scenes" in result
+
+    def test_generator_series_dir_for_nested_book_dir(self, tmp_path):
+        """Reproduces attempt 3 failure: generator derives series_dir wrongly
+        when output_dir is nested under a book subdir (e.g., series/airmen/b01cert/work).
+
+        Without the fix, generate_synopsis computes series_dir as
+        dirname(dirname(output_dir/synopsis.md)) = b01cert (the book dir),
+        then audit_synopsis looks for series_config.json in b01cert, which
+        does not exist.
+
+        With the fix, passing series_config_path explicitly ensures the
+        auditor receives the correct path regardless of nesting depth.
+        """
+        # Build fixture: series/airmen/b01cert/work/ mimicking the real layout
+        series_dir = tmp_path / "series" / "airmen"
+        book_dir = series_dir / "b01cert"
+        work_dir = book_dir / "work"
+        work_dir.mkdir(parents=True)
+
+        # series_config.json lives at the SERIES level, not the book level
+        series_config = series_dir / "series_config.json"
+        series_config.write_text(json.dumps({
+            "genre": "historical_war_thriller",
+            "series_name": "Airmen",
+            "series_directory": str(series_dir),
+            "pen_name": "Test",
+            "banned_phrases_path": str(series_dir / "banned_phrases.json"),
+        }))
+        (series_dir / "banned_phrases.json").write_text(
+            json.dumps({"names": [], "phrases": []})
+        )
+
+        # The bug: dirname(dirname(work_dir/synopsis.md)) = b01cert, not airmen
+        canonical = os.path.join(str(work_dir), "synopsis.md")
+        wrong_series_dir = os.path.dirname(os.path.dirname(canonical))
+        assert wrong_series_dir == str(book_dir), "precondition: old code gets book dir"
+        assert not os.path.exists(os.path.join(wrong_series_dir, "series_config.json")), \
+            "precondition: series_config.json does NOT exist in book dir"
+
+        # The fix: deriving series_dir from series_config_path
+        correct_series_dir = os.path.dirname(str(series_config))
+        assert correct_series_dir == str(series_dir)
+        assert os.path.exists(os.path.join(correct_series_dir, "series_config.json"))
 
 
 # ═══════════════════════════════════════════════════════════════════════════

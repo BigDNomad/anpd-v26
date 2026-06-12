@@ -614,6 +614,7 @@ def generate_synopsis(
     force_clean: bool = False,
     correction: str | None = None,
     targeted_chapters: list[int] | None = None,
+    series_config_path: str = "",
 ):
     """Generate scene-by-scene synopsis from operator outline + inputs.
 
@@ -1050,12 +1051,16 @@ def generate_synopsis(
     # ── Run synopsis_auditor (SA-1: rubric checks + integrity) ──
     print("\n  Step 7: Running synopsis_auditor (12 rubric checks + integrity)...")
     from synopsis_auditor import audit_synopsis
-    series_dir = os.path.dirname(os.path.dirname(canonical_path))  # .../series/black_tide
+    if series_config_path:
+        series_dir = os.path.dirname(series_config_path)
+    else:
+        series_dir = os.path.dirname(os.path.dirname(canonical_path))
     try:
         audit_result = audit_synopsis(
             synopsis_path=canonical_path,
             intake_path=intake_path,
             series_dir=series_dir,
+            series_config_path=series_config_path,
         )
     except Exception as e:
         print(f"    WARNING: synopsis_auditor failed to run: {e}")
@@ -1116,6 +1121,8 @@ def main():
                         help='Comma-separated chapter numbers to regenerate (e.g. "97,98,99,100")')
     parser.add_argument('--correction', type=str, default=None,
                         help='Correction text injected into the prompt for targeted chapters only')
+    parser.add_argument('--series-config', type=str, default="",
+                        help='Path to series_config.json (passed to embedded auditor)')
     args = parser.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
@@ -1138,6 +1145,7 @@ def main():
             force_clean=args.force_clean,
             correction=args.correction,
             targeted_chapters=targeted_chapters,
+            series_config_path=args.series_config,
         )
     except Exception as e:
         print(f"\n  FATAL ERROR: {e}", file=sys.stderr)
