@@ -15,7 +15,7 @@ Catches:
 Uses Haiku for extraction (batched by scene groups), then programmatic
 cross-referencing for contradiction detection.
 
-Severity: CLASS_B (advisory; demoted 20260612 per operator ruling D-A(1)).
+Severity: CLASS_A (these block publication).
 """
 
 from __future__ import annotations
@@ -367,7 +367,7 @@ def _deterministic_checks(manuscript: ManuscriptArtifact) -> list[Finding]:
                         if abs(sn1 - sn2) <= 5:
                             findings.append(Finding(
                                 check_id="MA-001-character-detail-consistency",
-                                severity="CLASS_B",  # demoted 20260612 D-A(1)
+                                severity="CLASS_A",
                                 scene_number=None,
                                 scene_numbers=sorted([sn1, sn2]),
                                 description=(
@@ -449,7 +449,7 @@ def _deterministic_checks(manuscript: ManuscriptArtifact) -> list[Finding]:
             for sn_u, ex_u in all_family_uni.items():
                 findings.append(Finding(
                     check_id="MA-001-character-detail-consistency",
-                    severity="CLASS_B",  # demoted 20260612 D-A(1)
+                    severity="CLASS_A",
                     scene_number=None,
                     scene_numbers=sorted([sn_s, sn_u]),
                     description=(
@@ -507,7 +507,7 @@ def _deterministic_checks(manuscript: ManuscriptArtifact) -> list[Finding]:
                         break
             findings.append(Finding(
                 check_id="MA-001-character-detail-consistency",
-                severity="CLASS_B",  # demoted 20260612 D-A(1)
+                severity="CLASS_A",
                 scene_number=None,
                 scene_numbers=sorted(set(scene_nums)),
                 description=(
@@ -525,10 +525,7 @@ def _deterministic_checks(manuscript: ManuscriptArtifact) -> list[Finding]:
 
 class CharacterDetailConsistency:
     check_id = "MA-001-character-detail-consistency"
-    # Demoted to CLASS_B 20260612 per operator ruling D-A(1): nondeterministic LLM extraction
-    # unfit for publish-gating; count/designation fact families move to ledger-backed MA-047
-    # (F-INT-9 Part 2).
-    severity = "CLASS_B"
+    severity = "CLASS_A"
     description = (
         "Cross-scene character detail consistency: physical descriptions, "
         "biographical facts, material/prop brands, ranks/titles, "
@@ -578,7 +575,7 @@ class CharacterDetailConsistency:
 
                 findings.append(Finding(
                     check_id=self.check_id,
-                    severity="CLASS_B",  # demoted 20260612 D-A(1)
+                    severity="CLASS_A",
                     scene_number=None,
                     scene_numbers=sorted(set(filter(None, [sn_a, sn_b]))),
                     description=(

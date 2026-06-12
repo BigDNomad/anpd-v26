@@ -203,6 +203,7 @@ def load_briefs(
     book_config_path: str | None = None,
     entity_ledger_path: str | None = None,
     synopsis_path: str | None = None,
+    book_character_profiles_path: str | None = None,
 ) -> BriefBundle:
     """Load all reference material into a BriefBundle."""
     bundle = BriefBundle()
@@ -212,6 +213,7 @@ def load_briefs(
         ("character_profiles", character_profiles_path),
         ("book_config", book_config_path),
         ("entity_ledger", entity_ledger_path),
+        ("book_character_profiles", book_character_profiles_path),
     ]:
         if path and os.path.isfile(path):
             with open(path, "r", encoding="utf-8") as f:
@@ -446,6 +448,8 @@ def _build_parser() -> argparse.ArgumentParser:
                         help="Path to book_config.json")
     parser.add_argument("--entity-ledger", default=None,
                         help="Path to entity_ledger.json (S-2 Phase 2a)")
+    parser.add_argument("--book-character-profiles", default=None,
+                        help="Path to book-level character_profiles.json (schema 1.1.0)")
     parser.add_argument("--synopsis", default=None,
                         help="Path to the book's synopsis.md. If omitted, "
                              "auto-derived from the manuscript's work/ dir. "
@@ -476,6 +480,7 @@ def main(argv: list[str] | None = None) -> int:
         book_config_path=args.book_config,
         entity_ledger_path=args.entity_ledger,
         synopsis_path=synopsis_path,
+        book_character_profiles_path=args.book_character_profiles,
     )
 
     exit_code, _ = run_audit(manuscript, briefs, output_dir=args.output_dir)

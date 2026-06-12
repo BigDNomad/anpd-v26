@@ -1,0 +1,223 @@
+{
+  "characters": [
+    {
+      "name": "Danny Archer",
+      "role": "Protagonist; A1C USAF Pararescueman (PJ), Jolly Green Two-Two",
+      "age": 22,
+      "background": "Cleveland, Ohio. Steel-town family, three older brothers in factory or military work. Enlisted at eighteen. Completed the full PJ pipeline — Indoctrination, Combat Swim School at Lackland, Fairchild SERE, Clark jungle adaptation. Two months in country, three weeks on the team. CSAR is his first operational scramble. Blood type O-negative, a detail he uses to save Coyle's life.",
+      "psychology": "Quiet. Watches more than he speaks. A former high-school wrestler — patient, precise, willing to be uncomfortable indefinitely. Hides nervousness well, but Vance can read him. Has not yet killed a man when the book opens; has by the end. CSAR is his forging: trainee to operator. The transfusion is when he becomes useful; the kill-order at the midpoint is when he becomes morally autonomous; refusing extraction at the lowest point is when he becomes who he will be for the rest of the series.",
+      "physical": "Twenty-two. Wrestler's build — compact, strong, controlled. Moves with patience, not flash.",
+      "voice": "Mostly listens. When he speaks, dry, Midwest-flat, occasionally undercut by sudden bluntness. Vocabulary larger than his coworkers expect — he reads books his brothers never opened.",
+      "relationships": {
+        "Silas Vance": "His mentor and senior PJ; the man who calls him 'pup'. Vance is teaching him to survive.",
+        "Tom Coyle": "The downed pilot he is sent to rescue; the man he refuses to abandon. Over ninety hours, Coyle becomes the one who teaches him what the job costs."
+      },
+      "arc_book_1": "Trainee to operator. From the man who could not sleep before his first mission to the man who walks back into a Pathet Lao bivouac alone to get Coyle. This is the arc book that establishes his stable core; from Book 2 on he is the competent operator he became here.",
+      "motifs": {
+        "the_pup": {
+          "rule": "Vance calls Archer 'pup' (establishing the veteran-teaches-the-rookie dynamic that echoes the series' 1945 origin). Use sparingly: established once at first meeting, then returned only as an earned echo at moments of weight (e.g., when Vance watches him fall). Do NOT restate the nickname as if new information after it is established."
+        }
+      }
+    },
+    {
+      "name": "Tom Coyle",
+      "role": "Series co-lead (established Airmen canon); CIA contract pilot, 'Crash King'. In CSAR: the downed pilot whose crash sets the plot in motion.",
+      "age": 45,
+      "background": "Trained as a young pilot by the US Army Air Forces in San Francisco at the start of WWII. Flew P-38s in the Pacific War, the Korean War, and the Chinese Revolution. Officially contract Air America; unofficially detailed to the CIA station in Vientiane, with cross-theater cipher clearance. Helped design modifications to the AC-119K gunship and trains CIA-affiliated pilots on the most dangerous missions. Holds the unofficial record for surviving downed aircraft in Southeast Asia — hence 'Crash King'.",
+      "psychology": "Brave, a great flyer, patriotic, straightforward. His rule is simple: never bail if you can ride it down — the aircraft is the shell, the crew is the cargo, and the shell can always be replaced. Haunted by the death of his best friend, James 'Earthquake McGoon' McGovern, killed at the Siege of Dien Bien Phu (1954). McGoon returns in his dreams, the fiery crash relived. Carries an older romantic wound — he was engaged to French journalist Brigette Firang until she left him for a French officer, Bruno.",
+      "physical": "Mid-forties. Weathered combat aviator. In CSAR: burned down his right arm and side from the cockpit fire, left femur broken from the crash, dying of internal bleeding across the book.",
+      "voice": "Backwoods charm over hard-boiled cynicism. Short declarative sentences. Will repeat a thing once, more slowly, if you don't catch it. Calls everyone by first name within five minutes. No second-string voice — he is the same man to a general and to a private.",
+      "relationships": {
+        "Danny Archer": "The young PJ who refuses to leave him. Coyle, dying, becomes the man who teaches Archer what the work costs. Gives Archer his .38 and, later, his Ka-Bar.",
+        "Rene Granier": "His partner and closest friend across the series; the cold, private sniper to Coyle's warmth. (Granier is not in CSAR.)"
+      },
+      "arc_book_1": "The man who has always survived everything is finally caught. His capture is the closest thing this book has to a victory for the antagonist. He survives his wounds but will never fly again.",
+      "motifs": {
+        "whittling": {
+          "rule": "Coyle carries a folding knife and a block of basswood. When stressed or thinking, he whittles small animals and gives them to children in war zones. In CSAR: a half-finished bird lies beside him when Archer finds him; the whittled bird changes hands at the end. His meditation, and the visible gentleness beneath the combat-pilot hardness."
+        },
+        "mcgoon_dreams": {
+          "rule": "The fiery death of Earthquake McGoon at Dien Bien Phu (1954) surfaces only in glimpses — a nightmare, an involuntary reaction to fire or a fiery crash. Never explained in full. CSAR's own fiery crash resonates against it. Use rarely and never as exposition."
+        }
+      }
+    },
+    {
+      "name": "Rene Granier",
+      "role": "Series co-lead (established Airmen canon); CIA sniper, 'Buck'. NOT in CSAR — entry present because he is a series lead across the run.",
+      "age": null,
+      "background": "Introduced in 'A War Too Far' (1945) as a young fighter pilot and expert rifleman with the OSS Deer Team going into Vietnam — the beginning of America's involvement. French surname; called 'Buck' for his deer hunting. A former Marine, taught to survive as a 'pup' by a WWI-veteran sergeant. Over the series becomes the consummate sniper; by 1975 has lived in Vietnam roughly thirty years and calls it home.",
+      "psychology": "Cold, private, taciturn, lethal. Keeps his own counsel; deals with his demons alone. 'Dead eyes', serious, dangerous, with a deadpan streak. The quiet, haunted counterpart to Coyle's warmth — together they are the engine of the series.",
+      "physical": "Tall, fit, hard. Carries a semi-automatic sniper rifle (M1 Garand sniper variant, eight .30-06 rounds, M81 scope, leather cheekpiece) he never lets out of his sight.",
+      "voice": "Spare to the point of silence. Says little; what he says is flat and exact. Deadpan when he chooses to engage.",
+      "relationships": {
+        "Tom Coyle": "His partner and closest friend across the series; the warm, voluble pilot to Granier's cold, private sniper."
+      },
+      "arc_book_1": "Not applicable — Granier does not appear in CSAR. Placeholder canon entry maintained for series continuity; to be fully developed when he first appears in a book of the new run.",
+      "motifs": {}
+    },
+    {
+      "name": "Silas Vance",
+      "role": "Senior PJ, mentor to Archer, the team's moral center ('Saint')",
+      "age": 38,
+      "background": "Mississippi Gulf Coast, son of a Methodist minister he no longer speaks to. Twelve years in. The senior pararescueman on Jolly Green Two-Two. Wife in Biloxi, a daughter he sees twice a year.",
+      "psychology": "Quiet, efficient, lethal. He saves lives — that is the job, period. Treats it as a religious calling without the religion. When Archer falls from the penetrator, Vance is on the hoist watching him go, and spends the book on the ground at NKP unable to do anything but prepare gear for the next attempt. The team will see him angrier than they have ever seen him.",
+      "physical": "Late thirties. Calm hands, economy of motion — the stillness of a man who has kept many people alive.",
+      "voice": "Calm, almost pastoral when keeping someone alive. Curt to the crew. Gives orders in the imperative without raising his voice. When he is in real pain, he goes quiet.",
+      "relationships": {
+        "Danny Archer": "His trainee, his 'pup'. He loses him inside the first thirty-six hours of the boy's first mission and has to live with it.",
+        "Tom Coyle": "The man Archer is fighting to save; Vance is the one who would fast-rope into the jungle to join the rescue if Sandy let him."
+      },
+      "arc_book_1": "He loses his trainee on the trainee's first mission and carries it. When Jolly Green Two-Two comes back over the strafing pattern at the end, Vance is on the hoist again — and takes a leg wound getting Archer and Coyle out.",
+      "motifs": {}
+    },
+    {
+      "name": "Jack Dalton",
+      "role": "Helicopter pilot / aircraft commander, Jolly Green Two-Two ('Pappy')",
+      "age": 35,
+      "background": "New Jersey. Got into the Korean War and never came home properly. Flew H-19s in Korea, transitioned through H-21s and H-34s to the HH-3E. Shot down twice and pulled out by other rescue crews — which is why he flies rescue now. Wife in Pensacola.",
+      "psychology": "Hates brass, loves his crew, uses sarcasm to defuse tension. Flies the Jolly Green like an extension of his body.",
+      "physical": "Mid-thirties going on sixty. The wear of a man who has been shot down and lived.",
+      "voice": "Drawls when he is being funny, clips when he is flying. On the radio he uses the call sign and nothing else. 'If we get shot down, don't worry about the VC. Worry about my wife finding out I scratched the paint.'",
+      "relationships": {
+        "Billy Evans": "His co-pilot, whom he is slowly deprogramming from by-the-book habits; recognized the kid's stick-and-rudder gift in the first week."
+      },
+      "arc_book_1": "Flies the damaged bird out of the kill zone when Archer falls, gets it home, and brings it back repaired for the final extraction with himself in the left seat.",
+      "motifs": {}
+    },
+    {
+      "name": "Billy Evans",
+      "role": "Co-pilot, Jolly Green Two-Two ('The Kid')",
+      "age": 24,
+      "background": "Indiana farm boy. Air Force Academy class of '67, second in his flight school class. By-the-book to a fault when he arrived, slowly being deprogrammed. An exceptional stick-and-rudder man with an instinctive feel for the airframe.",
+      "psychology": "Naive about the war's politics, which the team finds endearing and exasperating. Eager, earnest, trying to measure up.",
+      "physical": "Twenty-four. Young, clean-cut, still has the Academy in his posture.",
+      "voice": "Nervous energy, trying too hard to sound cool on the radio. Calls senior officers 'sir' three times in a sentence when rattled. Says 'ma'am' to Vietnamese women old enough to be his grandmother.",
+      "relationships": {
+        "Jack Dalton": "His aircraft commander and reluctant mentor; Dalton is teaching him the war the Academy didn't."
+      },
+      "arc_book_1": "Holds the co-pilot seat through the disaster and the return; part of the crew that brings the bird back for the final pull-out.",
+      "motifs": {}
+    },
+    {
+      "name": "Meat Kowalski",
+      "role": "Lead flight engineer / crew chief, Jolly Green Two-Two",
+      "age": 28,
+      "background": "South Side Chicago. A giant of a man — six-three, two-thirty. Operates the rescue hoist and the starboard minigun. Has personally pulled fourteen men out of bad places.",
+      "psychology": "Loves the helicopter more than people. Protective of the bird to the point of comedy.",
+      "physical": "Late twenties. Huge — the build that makes the hoist look easy.",
+      "voice": "Grunts. Technical complaints. Threatens to kill anyone who vomits in his bird. Will not say a full sentence in front of officers if a partial one will do.",
+      "relationships": {
+        "Silas Vance": "Works the hoist alongside the PJs; the muscle that hauls the rescued aboard."
+      },
+      "arc_book_1": "Works the hoist through the failed first attempt and the final extraction; helps haul Coyle and Archer aboard.",
+      "motifs": {}
+    },
+    {
+      "name": "Sparky Miller",
+      "role": "Flight engineer / scanner, Jolly Green Two-Two",
+      "age": 28,
+      "background": "Wisconsin. Second-generation Polish, third-generation electrical trades. A wiring genius. Operates the port scanner window and backs up Meat on systems. Has saved the bird twice with field-expedient electrical fixes no manual would approve.",
+      "psychology": "Paranoid conspiracy theorist about the airframe's many ways to fail — and usually right.",
+      "physical": "Twenty-eight. Wiry, restless hands always on something.",
+      "voice": "Fast-talking. Always convinced the hydraulics are about to fail. Talks to himself on the intercom in a low murmur Dalton finds soothing and Evans finds maddening.",
+      "relationships": {
+        "Meat Kowalski": "Systems partner; the two-man brain of the bird's mechanical survival."
+      },
+      "arc_book_1": "Keeps the damaged bird flyable; part of the crew through both rescue attempts.",
+      "motifs": {}
+    },
+    {
+      "name": "Animal Motherway",
+      "role": "Door gunner, Jolly Green Two-Two",
+      "age": 25,
+      "background": "Boston, a long history of trouble before he enlisted. Operates the port minigun. Wired, possibly unstable in a way the Air Force has not formally diagnosed.",
+      "psychology": "Loves the adrenaline of the work in a way that worries Vance. Says the things no one else will say — the team's comic relief and occasional liability.",
+      "physical": "Twenty-five. Coiled, twitchy energy.",
+      "voice": "High-octane. Inappropriate jokes during firefights. Sings to himself between contacts — pop songs with the lyrics deliberately mangled. Will deck an officer who steps on his bird without asking.",
+      "relationships": {
+        "Silas Vance": "Vance watches him, wary of the part of Animal that likes the violence too much."
+      },
+      "arc_book_1": "Mans the gun through both rescue attempts; the volatile edge of the crew.",
+      "motifs": {}
+    },
+    {
+      "name": "Bounchanh Vorasak",
+      "role": "Antagonist (local); Major, Pathet Lao commander, Khammouane province",
+      "age": 45,
+      "background": "Born in the highlands of Khammouane province to a Lao Theung family. Fought the French in his teens; knew Souphanouvong before the Pathet Lao consolidated under Hanoi's influence. Has commanded local forces here for nearly a decade and considers the karst, the rivers, and the people his own. In May 1966, a US Special Forces team raided his home village, Ban Sopkhao, on faulty intelligence about a radio relay; seventeen civilians died, including his wife Phaeng and his two daughters, Noy (8) and Mae (11). He was away on operations. He carries Mae's blue hair ribbon folded in his breast pocket. He has not remarried, and has not returned to the valley since the funeral.",
+      "psychology": "Did not hate the Americans before Ban Sopkhao; after, the hatred became the work. Career-defining ambition: bring down American air assets in maximum numbers, on his ground, on his terms. Has personally directed the destruction of fourteen American aircraft, eleven of them helicopters, each logged in a notebook he keeps with his maps. The damaging of Jolly Green Two-Two would be his fifteenth. The strategic priorities Tran arrives with interest him only insofar as they bring American helicopters back into his airspace.",
+      "physical": "Mid-forties. Hard, weathered, a man entirely of this terrain.",
+      "voice": "Lao, primarily — clipped, decisive, formally polite to his officers, brutal to his soldiers when discipline requires it. Speaks basic Vietnamese, which he resents using in his own command tent. Speaks no English. The sound of approaching helicopter rotors makes him go silent and very still.",
+      "relationships": {
+        "Tran Van Khoa": "The Hanoi intelligence officer who arrives to take charge of the recovery and outranks him on the cipher question but not on his own tactical operations. Their friction shapes the manhunt. Tran does not know about Ban Sopkhao.",
+        "Khamla": "His private, sent into the flames to retrieve the cipher chassis; Bounchanh watched him die and will not let it have been for nothing."
+      },
+      "arc_book_1": "Dies in the final battle, separated from his force, fighting his own war — killed in or after Sandy's strike. He thought he was the protagonist of his own province's story. He was. But not of this book.",
+      "motifs": {
+        "blue_hair_ribbon": {
+          "rule": "Mae's blue hair ribbon, folded in his breast pocket — the one personal item recovered from Ban Sopkhao. Surfaces only in private moments with his maps and notebook. Never explained aloud. The engine of his hatred, shown not told."
+        },
+        "aircraft_notebook": {
+          "rule": "A small notebook kept with his maps logging each American aircraft he has brought down. His tally and his ambition made physical."
+        }
+      }
+    },
+    {
+      "name": "Tran Van Khoa",
+      "role": "Antagonist (strategic); Captain, NVA General Reconnaissance Bureau intelligence officer",
+      "age": 38,
+      "background": "Hanoi-born, son of a colonial-era postal clerk turned Viet Minh courier. University of Hanoi, then cryptography and signals-intelligence training in Moscow in the early sixties. Attached to the General Reconnaissance Bureau (Cuc Quan bao) — strategic intelligence, not field signal corps. Speaks Russian, French, English, Vietnamese, and enough Lao to give orders. Has interrogated American prisoners in Hanoi. Never been this deep in Laotian territory until now.",
+      "psychology": "Sees the Pathet Lao as undisciplined country fighters whose ambitions interfere with strategic priorities — and does not say so aloud. Here because the recovery of a Type I US cipher machine's rotors is a strategic prize that, handled well, puts him in line for major and a General Staff posting. Not sadistic: torture is procedural, not personal. He would rather Coyle break in three days through fatigue, disorientation, and the withdrawal of medical care than in three hours through brutality — the intelligence yield is higher.",
+      "physical": "Late thirties. Composed, precise, urban in a jungle that is not his.",
+      "voice": "Cold, precise, faintly amused. Excellent English with a slight Russian inflection from his Moscow years. To Coyle he is conversational, almost solicitous — the iron is two days away, not in the first hour. Calls Coyle 'Tom' within an hour of capture.",
+      "relationships": {
+        "Bounchanh Vorasak": "The local commander whose territory and tactical operations he must work through; their objectives diverge and their friction shapes the manhunt.",
+        "Tom Coyle": "His prize — the captured pilot whose knowledge he is sent to extract."
+      },
+      "arc_book_1": "Survives the final battle; the move column scatters and he escapes back across the border with his NVA detail intact. The rotors are lost, Coyle is lost, his Hanoi mandate failed — but he is alive and the recovered chassis is in NVA hands. He will return in a later book.",
+      "motifs": {}
+    },
+    {
+      "name": "Khamla",
+      "role": "Minor; Private, Pathet Lao",
+      "age": 19,
+      "background": "From a village in Bounchanh's home province. Conscripted at sixteen, three years of fighting. Volunteers — or is volunteered — to retrieve the cipher chassis from the burning fuselage in the opening sequence. He gets it clear. The plane explodes. He dies of burns and blast.",
+      "psychology": "Obedient, young, brave in the small terrible way of conscripts.",
+      "physical": "Nineteen. A boy in a soldier's uniform.",
+      "voice": "Minimal; a few words before he goes into the flames.",
+      "relationships": {
+        "Bounchanh Vorasak": "His commander, who ordered him into the fire and remembers his face."
+      },
+      "arc_book_1": "Dies in the opening sequence retrieving the cipher chassis. Named because his death matters — the enemy has young soldiers who die badly too, and the book will not let the reader forget it.",
+      "motifs": {}
+    },
+    {
+      "name": "Bounmy",
+      "role": "Minor; Pathet Lao field commander under Bounchanh at the command post"
+    },
+    {
+      "name": "Briggs",
+      "role": "Minor; Black Widow AC-119K sensor operator, killed in SAM explosion"
+    },
+    {
+      "name": "Harwick",
+      "role": "Minor; Black Widow co-pilot who ejected over karst, fate unknown"
+    },
+    {
+      "name": "Paulson",
+      "role": "Minor; Black Widow minigun gunner, killed by shrapnel at gun mount"
+    },
+    {
+      "name": "Phomma",
+      "role": "Minor; Pathet Lao Sergeant under Bounchanh, positioned on north ridge"
+    },
+    {
+      "name": "Phommasack",
+      "role": "Minor; Pathet Lao Lieutenant reporting to Bounchanh, commands search cordons"
+    },
+    {
+      "name": "Whitfield",
+      "role": "Minor; Colonel at Nakhon Phanom RTAFB, operations commander overseeing CSAR"
+    }
+  ]
+}

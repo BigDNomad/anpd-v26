@@ -156,24 +156,39 @@ def build_canonical_roster(briefs: BriefBundle, synopsis_dir: str | None = None)
                 if len(part) > 1:
                     banned.add(part.lower())
 
-    # Source 2: character_profiles
-    profiles = briefs.character_profiles
-    for char in profiles.get("characters", []):
-        name = char.get("name", "")
-        if name:
-            roster.add(_normalize_name(name))
-            parts = name.strip().split()
-            for part in parts:
-                if len(part) > 1:
-                    roster.add(part.lower())
-        # Also extract names from relationships
-        for rel_name in char.get("relationships", {}).keys():
-            if rel_name:
-                roster.add(_normalize_name(rel_name))
-                parts = rel_name.strip().split()
+    # Source 2: character_profiles (series-level + book-level, both formats)
+    # Supports legacy {"characters": [...]} array format AND schema 1.1.0
+    # name-keyed format where top-level keys are character names.
+    def _ingest_profiles(profiles: dict) -> None:
+        """Add names from a profiles dict (either format) to the roster."""
+        if "characters" in profiles and isinstance(profiles["characters"], list):
+            # Legacy array format: {"characters": [{name: ...}, ...]}
+            chars = profiles["characters"]
+        else:
+            # Schema 1.1.0 name-keyed: {"Name": {name: "Name", ...}, ...}
+            chars = list(profiles.values())
+            # Filter out non-dict entries (shouldn't exist but defensive)
+            chars = [c for c in chars if isinstance(c, dict)]
+
+        for char in chars:
+            name = char.get("name", "")
+            if name:
+                roster.add(_normalize_name(name))
+                parts = name.strip().split()
                 for part in parts:
                     if len(part) > 1:
                         roster.add(part.lower())
+            # Also extract names from relationships
+            for rel_name in char.get("relationships", {}).keys():
+                if rel_name:
+                    roster.add(_normalize_name(rel_name))
+                    parts = rel_name.strip().split()
+                    for part in parts:
+                        if len(part) > 1:
+                            roster.add(part.lower())
+
+    _ingest_profiles(briefs.character_profiles)
+    _ingest_profiles(briefs.book_character_profiles)
 
     # Source 3: banned_phrases.json names (via book_config, which may contain it)
     book_config = briefs.book_config

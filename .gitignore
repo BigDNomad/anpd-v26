@@ -13,11 +13,12 @@ series/*/b*/work/*.log
 series/*/b*/out/manifest_audits/
 series/*/b*/out/reports/*.json
 series/*/b*/out/reports/*.md
-series/*/b*/out/scenes/
+series/*/b*/out/scenes/*
+!series/*/b*/out/scenes/*.md
 series/*/b*/out/state/
 
 # Repo-root run products
-out/
+/out/
 
 # Summarizer failure dumps (should go to work/ not repo root)
 summarizer_failure_*.txt

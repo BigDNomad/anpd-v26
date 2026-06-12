@@ -57,6 +57,7 @@ class BriefBundle:
     """All reference material available to check modules."""
     series_bible: dict = field(default_factory=dict)
     character_profiles: dict = field(default_factory=dict)
+    book_character_profiles: dict = field(default_factory=dict)
     book_config: dict = field(default_factory=dict)
     scene_map: dict = field(default_factory=dict)
     entity_ledger: dict = field(default_factory=dict)

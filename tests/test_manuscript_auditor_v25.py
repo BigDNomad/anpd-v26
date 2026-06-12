@@ -495,7 +495,7 @@ class TestCharacterDetailConsistencyModule:
         assert hasattr(check, "description")
         assert hasattr(check, "run")
         assert check.check_id == "MA-001-character-detail-consistency"
-        assert check.severity == "CLASS_A"
+        assert check.severity == "CLASS_B"  # demoted 20260612 D-A(1)
 
     @patch("audit_checks.character_detail_consistency._call_llm")
     def test_run_with_no_claims(self, mock_llm):
@@ -537,7 +537,7 @@ class TestCharacterDetailConsistencyModule:
 
         hair_findings = [f for f in findings if "hair" in f.description.lower()]
         assert len(hair_findings) >= 1
-        assert hair_findings[0].severity == "CLASS_A"
+        assert hair_findings[0].severity == "CLASS_B"  # demoted 20260612 D-A(1)
         assert 7 in hair_findings[0].scene_numbers or 39 in hair_findings[0].scene_numbers
 
     @patch("audit_checks.character_detail_consistency._call_llm")
@@ -934,7 +934,7 @@ class TestMA001TimelineAware:
         # between scenes 25 and 26 is far less than AGE_MIN_DAYS (365)
         daughter_findings = [f for f in findings if "daughter" in f.description.lower()]
         assert len(daughter_findings) >= 1, "Funes daughter ages contradiction should be caught"
-        assert daughter_findings[0].severity == "CLASS_A"
+        assert daughter_findings[0].severity == "CLASS_B"  # demoted 20260612 D-A(1)
         assert 25 in daughter_findings[0].scene_numbers
         assert 26 in daughter_findings[0].scene_numbers
 
