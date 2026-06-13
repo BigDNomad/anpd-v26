@@ -1615,6 +1615,7 @@ def main():
 
     # ── Multi-pass LLM audit ──
     all_passes = []
+    pass_errors = []  # record per-pass exceptions for audit report visibility
     for pass_num in range(1, NUM_PASSES + 1):
         print(f"\n  ── Pass {pass_num}/{NUM_PASSES} ──")
         try:
@@ -1630,10 +1631,26 @@ def main():
             print(f"    Pass {pass_num} verdicts: {verdicts_str}")
             all_passes.append((c1, c2))
         except Exception as e:
-            print(f"  FATAL: Pass {pass_num} failed: {e}", file=sys.stderr)
-            stop_path = _write_stop_report(book_dir, str(e), f"Pass {pass_num} failed")
-            print(f"  STOP_REPORT written: {stop_path}", file=sys.stderr)
-            sys.exit(1)
+            # Per-pass failures are recoverable in a majority-gated audit.
+            # Log the exception; do NOT write a STOP_REPORT or exit.
+            # A single failed pass does not invalidate the gate — the
+            # remaining passes can still produce a majority verdict.
+            error_info = {"pass": pass_num, "exception": type(e).__name__, "message": str(e)}
+            pass_errors.append(error_info)
+            print(f"  WARNING: Pass {pass_num} failed ({type(e).__name__}): {e}", file=sys.stderr)
+            print(f"    Continuing to next pass (majority gate tolerates 1/{NUM_PASSES} failure)")
+
+    if len(all_passes) < 2:
+        # Fewer than 2 successful passes — cannot form a majority verdict.
+        error_msg = (
+            f"Only {len(all_passes)}/{NUM_PASSES} passes succeeded; "
+            f"need at least 2 for majority verdict. "
+            f"Errors: {pass_errors}"
+        )
+        print(f"  FATAL: {error_msg}", file=sys.stderr)
+        stop_path = _write_stop_report(book_dir, error_msg, "insufficient passes for majority")
+        print(f"  STOP_REPORT written: {stop_path}", file=sys.stderr)
+        sys.exit(1)
 
     # ── Merge multi-pass results ──
     print(f"\n  Merging {NUM_PASSES}-pass results (majority vote)...")
@@ -1671,6 +1688,11 @@ def main():
     findings_path = os.path.join(book_dir, 'synopsis_findings.json')
     with open(findings_path, 'w') as f:
         json.dump(findings_envelope, f, indent=2)
+
+    # Record per-pass exceptions in audit report for observability.
+    if pass_errors:
+        output_json["pass_errors"] = pass_errors
+        print(f"  WARNING: {len(pass_errors)} pass(es) failed — recorded in audit report")
 
     # Save legacy outputs
     json_path = os.path.join(book_dir, 'synopsis_audit_report.json')

@@ -728,6 +728,14 @@ def run_pipeline(args: argparse.Namespace) -> int:
     for subdir in ("out/scenes", "out/state", "out/reports"):
         os.makedirs(os.path.join(args.book_dir, subdir), exist_ok=True)
 
+    # Clean stale STOP_REPORT from prior runs.  R007 checks file existence
+    # (not mtime), so a leftover from a prior run would falsely trigger it.
+    # A new run starts clean — any real failure will re-create the file.
+    stale_stop = stop_report_path(args.book_dir)
+    if os.path.isfile(stale_stop):
+        print(f"  [cleanup] removing stale STOP_REPORT from prior run: {stale_stop}")
+        os.remove(stale_stop)
+
     # Dry-run early exit.
     if args.dry_run:
         print("\n--dry-run: preflight passed; exiting without phase execution.")
