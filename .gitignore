@@ -17,6 +17,24 @@ series/*/b*/out/scenes/*
 !series/*/b*/out/scenes/*.md
 series/*/b*/out/state/
 
+# Run output files (manuscripts, exports, logs)
+series/*/b*/out/*.md
+series/*/b*/out/*.docx
+series/*/b*/out/chapters/
+series/*/b*/out/reports/*.log
+series/*/b*/out/_archive/
+
+# Work-dir runtime artifacts (character profiles, backups, bundles, gate stdout)
+series/*/b*/work/character_profiles_*.json
+series/*/b*/work/character_generation_findings.json
+series/*/b*/work/gate3_stdout_*.json
+series/*/b*/work/scenes_backup_*/
+series/*/b*/work/bundles/
+series/*/b*/work/archive_*/
+
+# Cert attempt archives
+series/*/b*cert/attempt*_archive/
+
 # Repo-root run products
 /out/
 
