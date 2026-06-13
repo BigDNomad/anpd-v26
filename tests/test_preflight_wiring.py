@@ -66,6 +66,22 @@ def _make_clean_fixture(tmp_path):
     with open(os.path.join(work_dir, "intake.json"), "w") as f:
         json.dump(intake, f)
 
+    # Book-level book_config (brief-layer input)
+    book_config = {
+        "title": "Test",
+        "book_number": 1,
+        "series_directory": "/anpd/v26/series/airmen",
+        "antagonist_concept": {
+            "name": "Villain",
+            "core_threat": "A dangerous adversary."
+        },
+        "supporting_cast_needs": [],
+        "do_not_appear": [],
+        "recurring_appearances": [],
+    }
+    with open(os.path.join(work_dir, "book_config.json"), "w") as f:
+        json.dump(book_config, f)
+
     return book_dir, series_dir
 
 
@@ -148,8 +164,9 @@ class TestPreRunClean:
         _, results = run_preflight(book_dir, series_dir, stage="pre_run")
 
         rule_ids = {r.rule_id for r in results}
-        # F008 (synopsis), F010-F012, F023-F025 must not appear at pre_run
-        post_only = {"F004", "F006", "F008", "F010", "F011", "F012",
+        # F008 (synopsis), F011-F012, F023-F025 must not appear at pre_run
+        # Note: F010 (book_config) IS now checked at pre_run (brief-layer input)
+        post_only = {"F004", "F006", "F008", "F011", "F012",
                      "F023", "F024", "F025"}
         present = post_only & rule_ids
         assert present == set(), f"Post-synopsis F-rules should not run at pre_run: {present}"
@@ -283,12 +300,54 @@ class TestStageClassification:
         post_only = full_ids - pre_ids
         known_post_only = (
             {f"S{i:03d}" for i in range(1, 10)}  # S001-S009
-            | {"F004", "F006", "F008", "F010", "F011", "F012",
+            | {"F004", "F006", "F008", "F011", "F012",
                "F023", "F024", "F025"}
-            | {"V003", "V004", "V005", "V006", "V008", "V010"}
+            # Note: F010, V003 moved to pre_run (book_config is brief-layer input)
+            | {"V004", "V005", "V006", "V008", "V010"}
         )
         unclassified = post_only - known_post_only
         assert unclassified == set(), f"Unclassified rules: {unclassified}"
+
+
+# ─── book_config.json at pre_run ──────────────────────────────────────────────
+
+class TestBookConfigAtPreRun:
+    """F010 must fire at pre_run when book_config.json is missing."""
+
+    def test_missing_book_config_fires_class_a_at_pre_run(self, tmp_path):
+        from preflight_v26_20260611 import run_preflight
+
+        book_dir, series_dir = _make_clean_fixture(tmp_path)
+        # Remove book_config.json
+        os.remove(os.path.join(book_dir, "work", "book_config.json"))
+
+        _, results = run_preflight(book_dir, series_dir, stage="pre_run")
+        f010 = [r for r in results if r.rule_id == "F010"]
+        assert len(f010) == 1, "F010 must run at pre_run"
+        assert not f010[0].passed, "F010 must fail when book_config.json is missing"
+        assert f010[0].severity == "A"
+
+    def test_present_book_config_passes_at_pre_run(self, tmp_path):
+        from preflight_v26_20260611 import run_preflight
+
+        book_dir, series_dir = _make_clean_fixture(tmp_path)
+        _, results = run_preflight(book_dir, series_dir, stage="pre_run")
+        f010 = [r for r in results if r.rule_id == "F010"]
+        assert len(f010) == 1, "F010 must run at pre_run"
+        assert f010[0].passed, "F010 must pass when book_config.json exists"
+
+    def test_invalid_json_book_config_fires_v003_at_pre_run(self, tmp_path):
+        from preflight_v26_20260611 import run_preflight
+
+        book_dir, series_dir = _make_clean_fixture(tmp_path)
+        # Corrupt book_config.json
+        with open(os.path.join(book_dir, "work", "book_config.json"), "w") as f:
+            f.write("{invalid json")
+
+        _, results = run_preflight(book_dir, series_dir, stage="pre_run")
+        v003 = [r for r in results if r.rule_id == "V003"]
+        assert len(v003) == 1, "V003 must run at pre_run"
+        assert not v003[0].passed, "V003 must fail on invalid JSON"
 
 
 # ─── Exit-code propagation ──────────────────────────────────────────────────

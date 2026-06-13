@@ -93,10 +93,10 @@ SHARED_DIR = os.path.join(V24_ROOT, "shared")
 VALID_STAGES = {"pre_run", "post_synopsis"}
 
 # Rules active at each stage. post_synopsis includes everything.
-PRE_RUN_F_RULES = {"F001", "F002", "F003", "F005", "F007",
+PRE_RUN_F_RULES = {"F001", "F002", "F003", "F005", "F007", "F010",
                    "F013", "F014", "F015", "F016", "F017", "F018",
                    "F019", "F020", "F021", "F022", "F026"}
-PRE_RUN_V_RULES = {"V001", "V002", "V007"}
+PRE_RUN_V_RULES = {"V001", "V002", "V003", "V007"}
 
 VALID_SCENE_COUNTS = {75, 100, 125}
 SYNOPSIS_WORD_MIN = 18000

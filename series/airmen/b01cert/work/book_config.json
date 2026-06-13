@@ -1,0 +1,33 @@
+{
+  "title": "CSAR",
+  "book_number": 1,
+  "series_directory": "/anpd/v26/series/airmen",
+  "protagonist": "Danny Archer",
+  "antagonist_concept": {
+    "name": "Bounchanh Vorasak",
+    "core_threat": "A Pathet Lao provincial commander who controls the territory around the crash site and hunts the downed pilot to exploit the intelligence value of captured American aircrew."
+  },
+  "supporting_cast_needs": [
+    {
+      "narrative_function": "Senior PJ and mentor who models the creed under fire and serves as Archer's moral compass.",
+      "name": "Silas Vance"
+    },
+    {
+      "narrative_function": "The downed CIA contract pilot whose survival drives the rescue mission and whose injuries raise the stakes.",
+      "name": "Tom Coyle"
+    },
+    {
+      "narrative_function": "Helicopter aircraft commander who flies the extraction under fire and embodies institutional calm.",
+      "name": "Jack Dalton"
+    },
+    {
+      "narrative_function": "NVA intelligence officer who represents the strategic-level threat and escalates pressure on Bounchanh's pursuit.",
+      "name": "Tran Van Khoa"
+    }
+  ],
+  "book_subtext": "The cost of earning the right to say 'that others may live' — a two-year initiation compressed into one mission.",
+  "do_not_appear": [
+    "Rene Granier"
+  ],
+  "recurring_appearances": []
+}
