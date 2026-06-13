@@ -881,8 +881,13 @@ def consolidate(call_1_data, call_2_data, title, word_count, effective_config):
     for item in call_2_data.get('items', []):
         all_items.append(item)
 
-    fails = [i for i in all_items if i.get('verdict') == 'FAIL']
-    weaks = [i for i in all_items if i.get('verdict') == 'WEAK']
+    # Advisory-only checks (e.g. Q5) with FAIL verdict are downgraded to
+    # WEAK for overall-verdict purposes — they must not gate the pipeline.
+    fails = [i for i in all_items
+             if i.get('verdict') == 'FAIL' and i.get('id') not in _ADVISORY_ONLY_CHECKS]
+    weaks = [i for i in all_items
+             if i.get('verdict') == 'WEAK'
+             or (i.get('verdict') == 'FAIL' and i.get('id') in _ADVISORY_ONLY_CHECKS)]
     passes = [i for i in all_items if i.get('verdict') in ('PASS', 'N/A')]
 
     total_scenes = call_1_data.get('total_scenes', 0)

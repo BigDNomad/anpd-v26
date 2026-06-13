@@ -26,6 +26,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from synopsis_auditor import (
     items_to_findings,
+    consolidate,
     _ADVISORY_ONLY_CHECKS,
     _majority_verdict,
 )
@@ -167,3 +168,59 @@ class TestMajorityVerdictStability:
         verdict, stable = _majority_verdict(["FAIL", "FAIL", "FAIL"])
         assert verdict == "FAIL"
         assert stable is True
+
+
+# ─── Consolidation demotion tests ─────────────────────────────────────────────
+
+class TestConsolidationDemotion:
+
+    def _make_call_data(self, items):
+        return {
+            "items": items,
+            "total_scenes": 100,
+            "action_scenes": 67,
+            "action_scene_percentage": 67.0,
+            "resolution_scenes": 2,
+        }
+
+    def test_q5_fail_does_not_make_overall_verdict_fail(self):
+        """Q5 FAIL alone must not produce overall verdict FAIL."""
+        call_1 = self._make_call_data([
+            {"id": "Q1", "verdict": "PASS", "note": ""},
+            {"id": "Q5", "verdict": "FAIL", "note": "Violation found."},
+        ])
+        call_2 = self._make_call_data([])
+        output, _, verdict = consolidate(
+            call_1, call_2, "Test", 10000, _effective_config()
+        )
+        assert verdict != "FAIL", "Q5 FAIL must not gate — it is advisory-only"
+        # Q5 should appear in weaks, not fails
+        assert "Q5" not in output.get("fails", [])
+        assert "Q5" in output.get("weaks", [])
+
+    def test_non_advisory_fail_still_gates(self):
+        """A non-advisory check (e.g. Q1) FAIL must still produce FAIL verdict."""
+        call_1 = self._make_call_data([
+            {"id": "Q1", "verdict": "FAIL", "note": "Missing element."},
+            {"id": "Q5", "verdict": "PASS", "note": ""},
+        ])
+        call_2 = self._make_call_data([])
+        _, _, verdict = consolidate(
+            call_1, call_2, "Test", 10000, _effective_config()
+        )
+        assert verdict == "FAIL"
+
+    def test_q5_fail_plus_other_fail_overall_still_fail(self):
+        """If both Q5 and a real check FAIL, overall is still FAIL (from the real check)."""
+        call_1 = self._make_call_data([
+            {"id": "Q1", "verdict": "FAIL", "note": "Missing."},
+            {"id": "Q5", "verdict": "FAIL", "note": "Violation."},
+        ])
+        call_2 = self._make_call_data([])
+        output, _, verdict = consolidate(
+            call_1, call_2, "Test", 10000, _effective_config()
+        )
+        assert verdict == "FAIL"
+        assert "Q1" in output["fails"]
+        assert "Q5" not in output["fails"]
+        assert "Q5" in output["weaks"]
