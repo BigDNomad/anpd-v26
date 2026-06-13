@@ -497,7 +497,7 @@ def check_banned_phrases(scenes: List[Scene], banned_data: dict, synopsis_path: 
 def check_chapter_count(synopsis_text, effective_config, synopsis_path):
     """Deterministic chapter-count check against effective config.
 
-    Counts ### Chapter N markers in the synopsis and compares to
+    Counts ## Chapter N markers in the synopsis and compares to
     effective_config['target_chapter_count']. Emits a finding on mismatch.
     """
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M')
@@ -507,7 +507,7 @@ def check_chapter_count(synopsis_text, effective_config, synopsis_path):
     if expected is None:
         return findings
 
-    chapter_markers = re.findall(r'^### Chapter \d+', synopsis_text, re.MULTILINE)
+    chapter_markers = re.findall(r'^## Chapter \d+', synopsis_text, re.MULTILINE)
     actual = len(chapter_markers)
 
     if actual != expected:
@@ -614,6 +614,7 @@ def _build_call_1_rubric(effective_config):
 - Antagonist motivation is internally consistent with their profile
 - Supporting characters operate within their established limitations
 - FAIL if any character violates their profile rules
+- For each violation found, include a "violations" array in the Q5 item (see INSTRUCTIONS)
 
 [Q9] What percentage of scenes are action scenes?
 - Count total scenes
@@ -755,6 +756,7 @@ Score each item: PASS / WEAK / FAIL
 === INSTRUCTIONS ===
 Score ONLY the rubric items listed above. For any WEAK or FAIL, cite the specific scene number and describe the issue.
 
+For Q5, if WEAK or FAIL, include a "violations" array in the Q5 item. Each element must have: {{"character": "<name>", "scene": <scene_number>, "profile_rule": "<the inviolable rule violated>"}}.
 For Q9, count every scene in the synopsis and classify each as action or non-action. Report exact counts.
 For Q19, identify all post-climax scenes and classify each as AFTERMATH or DENOUEMENT per the rubric. Include the post_climax_scenes array in your Q19 item.
 
@@ -972,6 +974,14 @@ def _interpolate_suggested_fix(template, effective_config):
         return template
 
 
+# Checks demoted from Class A gating.  A non-converging check must not gate
+# at Class A and must not feed a fixer — same principle as MA-001 demotion.
+# Q5 (character_profile_fidelity): rubric is too subjective to converge
+# across 3 passes (observed 3-way WEAK/FAIL/PASS splits).  Capped at B
+# until the rubric can be made deterministic.
+_ADVISORY_ONLY_CHECKS: set[str] = {"Q5"}
+
+
 def items_to_findings(call_1_data, call_2_data, synopsis_path, effective_config):
     """Convert PASS/WEAK/FAIL rubric items into V24 findings.
 
@@ -1029,12 +1039,27 @@ def items_to_findings(call_1_data, call_2_data, synopsis_path, effective_config)
 
         suggested_fix = _interpolate_suggested_fix(meta['suggested_fix'], effective_config)
 
+        # Advisory-only checks are capped at Class B — they must never gate.
+        if rubric_id in _ADVISORY_ONLY_CHECKS:
+            finding_class = "B"
+        else:
+            finding_class = "A" if verdict == "FAIL" else "B"
+
+        # Q5 evidence: extract structured violations from LLM response
+        evidence = None
+        if rubric_id == "Q5":
+            violations = item.get('violations')
+            if violations and isinstance(violations, list):
+                evidence = {"violations": violations}
+            else:
+                evidence = {"violations": [], "note": "no structured evidence returned"}
+
         finding = create_finding(
             finding_id=f"synopsis_{meta['pass_name']}_{counter:04d}",
             auditor="synopsis_auditor",
             gate="synopsis",
             pass_name=meta['pass_name'],
-            class_="A" if verdict == "FAIL" else "B",
+            class_=finding_class,
             tier="3",
             category=meta['category'],
             description=description,
@@ -1043,7 +1068,7 @@ def items_to_findings(call_1_data, call_2_data, synopsis_path, effective_config)
                 "rubric_id": rubric_id,
                 "synopsis_path": synopsis_path,
             },
-            evidence=None,
+            evidence=evidence,
             confidence="HIGH" if verdict == "FAIL" else "MEDIUM",
             fix_action="route_to_rewrite",
             suggested_fix=suggested_fix,
